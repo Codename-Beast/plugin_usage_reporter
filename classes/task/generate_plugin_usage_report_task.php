@@ -22,7 +22,8 @@ use core\task\scheduled_task;
 use core\message\message;
 use moodle_exception;
 use stdClass;
-use local_pluginusagereporter\{api_handler,ErrorHandler,logger,message_send,notifier};
+use local_pluginusagereporter\external\api_handler;
+use local_pluginusagereporter\{ErrorHandler,logger};
 use local_pluginusagereporter\datafetcher\{DataFetchInterface, MaterializedViewFetcher, RawDataFetcher};
 use local_pluginusagereporter\reportgenerator\{ReportGeneratorInterface, HtmlReportGenerator, TextReportGenerator};
 
