@@ -88,6 +88,7 @@ Every PHP file now includes versioning in the header following this schema:
 
 
 # Examples  for Multi-Instance Config:
+```json
 {
   "moodle_instance_1": {
     "dbhost": "localhost",
