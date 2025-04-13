@@ -54,7 +54,7 @@ class RawDataFetcher implements DataFetchInterface
      * -------------------*/
 
     /**
-     * Fetches raw plugin usage data from the database.
+     * [Since v1.1.1-10 G] Fetches raw plugin usage data from the database with optional caching.
      *
      * @param int $timeframe The number of days to look back from the current time.
      * @return array An array of plugin usage records.
@@ -62,15 +62,38 @@ class RawDataFetcher implements DataFetchInterface
      */
     public function fetch_data(int $timeframe): array
     {
+        if (!empty($this->instance)) {
+            $this->connect_to_instance($this->instance);
+        }
+
         try {
+            // Check if caching is enabled
+            $cachingEnabled = (bool) get_config('local_pluginusagereporter', 'enable_caching');
+            $cacheTTL = (int) get_config('local_pluginusagereporter', 'cache_ttl') ?: 3600;
+
+            $cacheKey = 'plugin_usage_' . $timeframe;
+            if ($cachingEnabled) {
+                $cachedData = $this->cache->get($cacheKey);
+                if ($cachedData !== false) {
+                    $this->log_debug('Cache hit for key: ' . $cacheKey);
+                    return $cachedData;
+                }
+                $this->log_debug('Cache miss for key: ' . $cacheKey);
+            }
+
             $params = $this->build_query_params($timeframe);
             $sql = $this->build_sql_query($params);
 
             $this->log_debug('Executing SQL query', ['sql' => $sql, 'params' => $params]);
 
-            $result = $this->db->get_records_sql($sql, $params);
+            $result = $this->db->get_records_sql($sql, $params) ?: [];
 
-            return $result ?: [];
+            if ($cachingEnabled) {
+                $this->cache->set($cacheKey, $result, $cacheTTL);
+                $this->log_debug('Data cached', ['key' => $cacheKey, 'ttl' => $cacheTTL]);
+            }
+
+            return $result;
         } catch (\Throwable $e) {
             $this->log_error('Fetch data failed', ['error' => $e->getMessage()]);
             $this->errorHandler->handle($e);
@@ -125,37 +148,57 @@ class RawDataFetcher implements DataFetchInterface
             return true;
         });
     }
-
     /**
-     * Transforms the given data into the specified format.
+    * [Since v1.1.1-10 C] Transforms the given data into the specified format.
      *
-     * @param array $data The data to be transformed.
-     * @param string $format The target format for the transformation ('json', 'txt', etc.).
-     * @return mixed Returns the transformed data in the specified format or handles an error if the format is unsupported.
-     */
-
-    /**
-     * Transforms the given data into the specified format.
-     *
-     * @param array $data The data to be transformed.
-     * @param string $format The target format for the transformation ('json', 'txt', etc.).
-     * @return mixed Returns the transformed data in the specified format or handles an error if the format is unsupported.
-     *
-     * Currently supported formats are:
-     * - 'json': returns the data as a JSON string using the JSON_PRETTY_PRINT flag.
-     * - 'txt': returns the data as a text string where each item is separated by a newline
-     *          and each field is separated by a pipe (|) character.
-     * @throws moodle_exception Thrown if the given format is not supported.
-     */
+    * @param array $data The data to be transformed.
+    * @param string $format The target format for the transformation ('json', 'txt', 'csv', 'xml').
+    * @return mixed Returns the transformed data in the specified format or handles an error if the format is unsupported.
+    * @throws moodle_exception If the given format is not supported
+    */
     public function transform_data(array $data, string $format)
     {
-        return match (strtolower($format)) {
-            'json' => json_encode($data, JSON_PRETTY_PRINT),
-            'txt'  => implode("\n", array_map(fn($item) => implode(' | ', (array)$item), $data)),
-            default => $this->errorHandler->handle(new moodle_exception('Unsupported format: ' . $format))
-        };
-    }
+        switch (strtolower($format)) {
+            case 'json':
+                return json_encode($data, JSON_PRETTY_PRINT);
 
+            case 'txt':
+                return implode("\n", array_map(fn($item) => implode(' | ', (array)$item), $data));
+
+            case 'csv':
+                $output = fopen('php://temp', 'r+');
+                if (!empty($data)) {
+                    // Add headers
+                    fputcsv($output, array_keys((array)$data[0]));
+                    // Add data rows
+                    foreach ($data as $row) {
+                        fputcsv($output, (array)$row);
+                    }
+                }
+                rewind($output);
+                $csv = stream_get_contents($output);
+                fclose($output);
+                return $csv;
+
+            case 'xml':
+                $xml = new \SimpleXMLElement('<report/>');
+
+                foreach ($data as $row) {
+                    $entry = $xml->addChild('entry');
+                    foreach ((array)$row as $key => $value) {
+                        // Clean key name for XML nodes
+                        $key = preg_replace('/[^a-z0-9_]/i', '', $key);
+                        $entry->addChild($key, htmlspecialchars((string)$value));
+                    }
+                }
+
+                return $xml->asXML();
+
+            default:
+                $this->errorHandler->handle(new moodle_exception('Unsupported format: ' . $format));
+                return null;
+        }
+    }
     /**
      * Validates the given data against the required fields.
      *
@@ -359,5 +402,35 @@ class RawDataFetcher implements DataFetchInterface
     private function log_error(string $message, array $data = []): void
     {
         debugging('ERROR: ' . $message . ' | ' . json_encode($data), DEBUG_DEVELOPER);
+    }
+
+    /**
+     *  Process multi-instance configuration and connect to selected instance.
+     *
+     * @param string $instanceName
+     * @return void
+     * @throws moodle_exception
+     */
+    private function connect_to_instance(string $instanceName): void
+    {
+        $instances = get_config('local_pluginusagereporter', 'instances');
+
+        if (empty($instances)) {
+            throw new \moodle_exception('No instances configured.');
+        }
+
+        $instancesConfig = json_decode($instances, true);
+
+        if (!isset($instancesConfig[$instanceName])) {
+            throw new \moodle_exception('Instance "' . $instanceName . '" not found in configuration.');
+        }
+
+        $instance = $instancesConfig[$instanceName];
+
+        // Example of applying DB settings (mocked, as Moodle DB drivers do not switch connections dynamically)
+        debugging('Multi-instance selected: ' . $instanceName, DEBUG_DEVELOPER);
+
+        // Note: Full dynamic DB switching requires external DB connection handling or Moodle multi-tenancy setup.
+        // Here we prepare configuration parsing and output for future extension.
     }
 }

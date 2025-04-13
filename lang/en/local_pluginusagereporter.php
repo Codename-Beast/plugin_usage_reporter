@@ -73,3 +73,22 @@ $string['date'] = 'Date';
 $string['timeframe'] = 'Timeframe';
 $string['entries'] = 'Entries';
 $string['actions'] = 'Actions';
+// [Since v1.1.1-10 A]: Manual API trigger button label
+$string['manualtrigger'] = 'Generate and Send Report Manually';
+$string['manualtrigger_desc'] = 'Click to manually generate and send the plugin usage report.';
+//$string['manualtrigger_success'] = 'Manual report generation and sending successful.';
+$string['invalidapikey'] = 'Invalid API key provided.';
+$string['apidescription'] = 'Provides plugin usage data for external monitoring systems.';
+$string['instances'] = 'Moodle Instances Configuration';
+$string['instances_desc'] = 'Define multiple Moodle instances in JSON format for cross-instance reporting.';
+// [Since v1.1.1-10 E]: Notification settings
+$string['enable_notifications'] = 'Enable Email Notifications';
+$string['enable_notifications_desc'] = 'Send email notifications for report events and API triggers.';
+// [Since v1.1.1-10 G]: Caching settings
+$string['enable_caching'] = 'Enable Caching';
+$string['enable_caching_desc'] = 'Enable or disable caching for plugin usage reports.';
+$string['cache_ttl'] = 'Cache Lifetime (seconds)';
+$string['cache_ttl_desc'] = 'Time to live for cache entries in seconds.';
+// [Since v1.1.1-10 I]: Event trigger settings
+$string['enable_event_api'] = 'Enable Event-based API Trigger';
+$string['enable_event_api_desc'] = 'Automatically trigger reports when specific events happen in Moodle.';

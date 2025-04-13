@@ -1,6 +1,6 @@
 <?php
 /**
- * v1.0.0-10 A 2025-04-13 [Initial Class Creation]
+ *  [Initial Class Creation]
  *
  * ErrorHandler class.
  *
@@ -21,6 +21,8 @@ defined('MOODLE_INTERNAL') || die();
 
 use Throwable;
 use moodle_exception;
+use local_pluginusagereporter\logger;
+use local_pluginusagereporter\notifier;
 
 class ErrorHandler
 {
@@ -46,6 +48,20 @@ class ErrorHandler
         $this->log_to_moodle($message, $exception);
 
         // Optional: Extend to email notification or custom logger
+        // Log error to custom logger
+        logger::add('error', $exception->getMessage(), [
+            'file' => $exception->getFile(),
+            'line' => $exception->getLine()
+        ]);
+
+        // [Since v1.1.1-10 E] Send email notification if enabled
+        notifier::send(
+            'Plugin Usage Reporter Error',
+            $exception->getMessage()
+        );
+
+        // Optional: Rethrow the exception if needed
+        // throw $exception;
     }
 
     /**
@@ -69,4 +85,5 @@ class ErrorHandler
             debugging('Moodle Exception Debug Data: ' . json_encode($exception->getDebugInfo()), DEBUG_DEVELOPER);
         }
     }
+
 }
