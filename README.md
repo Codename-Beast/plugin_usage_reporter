@@ -1,7 +1,7 @@
 # Plugin Usage Reporter for Moodle
 
 **Version:** 2.1  
-**Date:** 2025-04-13  
+**Date:**  13.05.2025
 **Author:** Bernd Schreistetter  
 **Compatibility:** Moodle 4.5+
 
@@ -31,7 +31,7 @@ It analyzes all installed modules in courses that have been accessed within a de
 
 ---
 
-## ✅ Current Project Status (As of 2025-04-13)
+## ✅ Current Project Status (As of 13.05.2025)
 
 | Feature | Status |
 |----------|---------|
@@ -56,7 +56,7 @@ It analyzes all installed modules in courses that have been accessed within a de
 
 ## 🆕 Latest Changes
 
-### v2.1 (2025-04-13)
+### v2.1 (13.05.2025)
 - ✅ RawDataFetcher: Full Interface compliance (fetch, cache, filter, transform, validate)
 - ✅ Central ErrorHandler integration
 - ✅ Moodle Cache API implemented (configurable)
