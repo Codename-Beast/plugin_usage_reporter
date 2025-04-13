@@ -1,0 +1,32 @@
+<div class="container-fluid">
+    <h2>{{#str}} dashboardtitle, local_pluginusagereporter {{/str}}</h2>
+    
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Datum</th>
+                <th>Zeitraum</th>
+                <th>Einträge</th>
+                <th>Aktionen</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#reports}}
+            <tr>
+                <td>{{id}}</td>
+                <td>{{date}}</td>
+                <td>{{timeframe}}</td>
+                <td>{{entries}}</td>
+                <td>
+                    <a href="#" class="btn btn-secondary">Details</a>
+                </td>
+            </tr>
+            {{/reports}}
+        </tbody>
+    </table>
+    
+    <div class="text-center mt-4">
+        <small>&copy; 2025 Developed by Eledia.de | Developer: Bernd Schreistetter</small>
+    </div>
+</div>

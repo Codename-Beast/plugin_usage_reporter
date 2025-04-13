@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<XMLDB PATH="/local/pluginusagereporter/db" VERSION="2024100700">
+  <TABLES>
+    <TABLE NAME="local_pluginusagereporter_reports">
+      <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+      <!-- Blow we can add User ID etc just for testing !-->
+      <!-- <FIELD NAME="uid" TYPE="int" LENGTH="10" NOTNULL="true"/> !-->
+      <FIELD NAME="timestamp" TYPE="int" LENGTH="10" NOTNULL="true"/>
+      <FIELD NAME="timeframe_days" TYPE="int" LENGTH="4" NOTNULL="true"/>
+      <FIELD NAME="report_data" TYPE="text" NOTNULL="true"/>
+      <FIELD NAME="report_format" TYPE="char" LENGTH="10" NOTNULL="true"/>
+      <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      <INDEX NAME="idx_cm_added" UNIQUE="false">
+      <COLUMN NAME="added"/>
+      </INDEX>
+    </TABLE>
+  </TABLES>
+</XMLDB>
