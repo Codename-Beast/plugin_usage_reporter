@@ -24,10 +24,10 @@
  * @license    MIT https://opensource.org/licenses/MIT 
  */
 
-defined('MOODLE_INTERNAL') || die();
+ defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2024100700;
-$plugin->requires  = 2023051500;
-$plugin->component = 'local_pluginusagereporter';
-$plugin->maturity = MATURITY_STABLE;
-$plugin->release = '1.3';
+ $plugin->component = 'local_pluginusagereporter';
+ $plugin->version = 2025041300;
+ $plugin->release = 'v2.1';
+ $plugin->maturity = MATURITY_STABLE;
+ $plugin->requires = 2022041900; // Moodle 4.5+

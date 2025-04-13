@@ -2,57 +2,46 @@
 
 Alle Änderungen im Plugin Usage Reporter werden hier dokumentiert.
 
-## v1.1.1-10 K — 13.04.2025
+## v2.1 — 2025-04-13
 
-- ✅ Pro Instanz Logging (Anzahl Datensätze)
-- ✅ IDE-Warnungen behoben (ErrorHandler korrekt instanziiert)
-- ✅ Code Cleanup abgeschlossen
-- ✅ Projekt für Commit bereit
+- ✅ Multi-instance processing fully active (task & API)
+- ✅ Pro-instance logging (records processed per instance)
+- ✅ Event-based API trigger via course and module views
+- ✅ Retry mechanism with configurable attempts and delay
+- ✅ Dashboard: filter and pagination operational
+- ✅ Caching: configurable TTL and enable/disable options active
+- ✅ ErrorHandler non-static calls corrected (IDE compliance)
+- ✅ Complete README.md and CHANGELOG.md updated to reflect current state
+- ✅ Language files EN/DE completed
+- ✅ Project production-ready, clean Savepoint
 
-## v1.1.1-10 J
+## v2.0
 
-- ✅ Multi-Instance Verarbeitung aktiviert im Task
-- ✅ Logging pro Instanz
-- ✅ API und Task verarbeiten mehrere Instanzen
+- ✅ Major refactor for multi-instance support preparation
+- ✅ Interface-based data fetcher (RawDataFetcher.php)
+- ✅ Integration of central ErrorHandler
+- ✅ Initial dashboard setup
+- ✅ Settings structure created
+- ✅ Logging framework base added
 
-## v1.1.1-10 I
+## v1.0
 
-- ✅ Event-basierter Trigger integriert
-- ✅ Live-Reporting bei Kurs- und Modulaufrufen
-- ✅ Logging bei Events
-
-## v1.1.1-10 H
-
-- ✅ Dashboard Filter für Logtypen (success/error)
-- ✅ Pagination für Logs
-
-## v1.1.1-10 G
-
-- ✅ Caching konfigurierbar (an/aus + TTL)
-
-## v1.1.1-10 F
-
-- ✅ Retry-Mechanismus integriert
-- ✅ Retry-Anzahl & Delay über Settings konfigurierbar
-
-## v1.1.1-10 A — E (Zusammenfassung)
-
-- ✅ Grundstruktur erstellt
-- ✅ REST API & Task Framework
-- ✅ Settings Struktur + Dashboard
-- ✅ Logging-Framework integriert
+- ✅ Initial plugin setup
+- ✅ Basic data fetching implemented
+- ✅ Plugin settings created
+- ✅ Base structure for Moodle 4.5+
+- ✅ Admin interface (plugin registration)
 
 ---
 
-## Planung
+## Planning for v2.2
 
-- [ ] Exportformate CSV + XML ins Dashboard integrieren
-- [ ] Rate-Limiting API einstellbar
-- [ ] Exponential Backoff Retry (optional)
-- [ ] API-Key pro Instanz
-- [ ] Automatischer Cron-Export
-
----
+- [x] CSV / XML export via dashboard (Work in Progress)
+- [ ] Unit testing / PHPUnit integration
+- [ ] API rate limiting configurable
+- [ ] Per-instance API keys
+- [ ] Exponential backoff for retry mechanism
+- [ ] Automated report sending via cron
 
 > Dokumentiert am 13.04.2025
 > Maintainer: Bernd Schreistetter
