@@ -35,24 +35,37 @@ It analyzes all installed modules in courses that have been accessed within a de
 
 | Feature | Status |
 |----------|---------|
-| Plugin Usage Data Fetching | ✅ Completed |
-| Pagination (limit/offset) | ✅ Completed |
-| Optional timeframe (enable/disable) | ✅ Completed |
-| Multi-instance processing | ✅ Completed |
-| Central ErrorHandler | ✅ Completed |
-| Moodle Logging API | ✅ Completed |
-| Data caching (Moodle Cache API) | ✅ Completed |
-| Data transformation (JSON, Text, CSV, XML) | ✅ Completed |
-| Data validation | ✅ Completed |
-| Dashboard Pagination & Filter | ✅ Completed |
-| External API endpoint | ✅ Completed |
-| Event-based trigger | ✅ Completed |
-| Multi-instance with DB connection | ✅ Completed |
-| Retry mechanism with delay (configurable) | ✅ Completed |
-| Pro-Instance data count logging | ✅ Completed |
-| Unit tests | ⏳ Planned (ErrorHandler tests ready) |
+|Plugin Usage Data Fetching	✅ Completed|
+|Pagination (limit/offset)	✅ Completed|
+|Optional timeframe (enable/disable)	✅ Completed|
+|Multi-instance processing	✅ Completed|
+|Multi-instance with DB connection	✅ Completed|
+|Pro-Instance data count logging	✅ Completed|
+|Retry mechanism with delay (configurable)	✅ Completed|
+|Central ErrorHandler	✅ Completed|
+|Moodle Logging API	✅ Completed|
+|Data caching (Moodle Cache API)	✅ Completed|
+|Data transformation (JSON, Text, CSV, XML)	✅ Completed|
+|Data validation	✅ Completed|
+|Dashboard Pagination & Filter	✅ Completed|
+|External API endpoint	✅ Completed|
+|Event-based trigger	✅ Completed|
+|Official Moodle Webservice Integration (planned v2.2)	⏳ Planned|
+|API Rate Limiting (configurable) (planned v2.2)	⏳ Planned|
+|Unit tests	⏳ In Progress (Details unten)|
 
----
+
+## 🧪 Unit Tests — Status as of 13.05.2025
+Testklasse / Bereich	Status	Anmerkung
+|✅ ErrorHandler Test	✅ Completed	Bereits vorhanden (Errorhandling getestet)|
+|🔄 RawDataFetcher Test	🔄 In Progress	Grundgerüst steht, Tests für multi-instance und data validation noch offen|
+|⏳ API Handler Test	⏳ Planned	API send report + error cases müssen getestet werden|
+|⏳ Event Trigger Test	⏳ Planned	Test, ob Events korrekt ausgelöst und verarbeitet werden|
+|⏳ Dashboard Test (Renderer / Pagination)	⏳ Planned	Test des Filters und der Pagination im Dashboard|
+|⏳ Report Generator (HTML / Text)	⏳ Planned	Report formatting und output validation|
+|⏳ Cache Test	⏳ Planned	Cache setzen und auslesen, Cache-Invalidierung|
+|⏳ Rate Limiting Test	⏳ Planned (für v2.2)	Konfigurierbares Rate-Limiting testen|
+|⏳ API Key / Token Validation Test	⏳ Planned (für v2.2)	Security-relevante Tests für API-Access|
 
 ## 🆕 Latest Changes
 
