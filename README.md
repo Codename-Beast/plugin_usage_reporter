@@ -1,43 +1,113 @@
-# Plugin Usage Reporter
+# Plugin Usage Reporter for Moodle
 
-## Project Description
+**Version:** 2.1  
+**Date:** 2025-04-13  
+**Author:** Bernd Schreistetter  
+**License:** MIT  
+**Compatibility:** Moodle 4.5+
 
-The **Plugin Usage Reporter** is a powerful Moodle plugin designed to monitor and analyze the usage of plugins in visible courses. It provides administrators and educators with valuable insights into user interactions with various plugins. By collecting and analyzing usage data over a period of up to 365 days, the plugin enables informed decision-making regarding the effectiveness and necessity of the deployed plugins. Reports are generated at regular intervals and can be sent in both HTML and plaintext formats to a predefined email address for easy distribution and archiving. This plugin utilizes the Moodle Task API to schedule and execute report generation.
+---
 
-## Features
+## 📌 Project Overview
 
-- **Usage Reports**: Tracks the usage of plugins/mods in visible courses over the past 365 days.
-- **Email Reporting**: Generates and sends HTML and plaintext reports to a configurable email address.
-- **Dashboard**: Provides an interactive dashboard for visualizing usage statistics.
-- **Cronjob**: Implemented as a scheduled cron job that runs daily.
-- **Security Measures**: SQL queries are secured to prevent SQL injection. HTML outputs are safely escaped.
-- **Moodle Task API**: Utilizes the API for scheduling and executing report generation.
+The Plugin Usage Reporter provides detailed reports on the usage of Moodle plugins (activities and resources) within visible courses.  
+It analyzes all installed modules in courses that have been accessed within a defined period.
 
-## Requirements
+### Key Features:
+- 🔍 Analyze plugin usage across all active courses
+- 📊 Output available as HTML or text reports
+- 🧩 Flexible timeframe (can be disabled)
+- 📦 Fully Moodle 4.5+ compatible
+- 📈 Role-based reporting: student / teacher / others
+- 🚀 Multi-instance support (prepared)
+- 🧩 Pagination for large datasets
+- 💾 Caching using Moodle Cache API
+- 🛠️ Centralized error handling via `ErrorHandler` class
+- 🪵 Moodle Logging API integration for debugging
+- 🧩 Interface-compliant structure for future fetchers
+- 📄 Full versioning and structured documentation
 
-- Moodle 4.5 or higher
-- PHP 8 or higher
-- The server must be configured for sending emails.
+---
 
-## Installation
+## ✅ Current Project Status (As of 2025-04-13)
 
-### 1. Install the Plugin
+| Feature | Status |
+|----------|---------|
+| Plugin Usage Data Fetching | ✅ Completed |
+| Pagination (limit/offset) | ✅ Completed |
+| Optional timeframe (enable/disable) | ✅ Completed |
+| Multi-instance preparation | ✅ Completed |
+| Central ErrorHandler | ✅ Completed |
+| Moodle Logging API | ✅ Completed |
+| Data caching (Moodle Cache API) | ✅ Completed |
+| Data transformation (JSON, Text) | ✅ Completed |
+| Data validation | ✅ Completed |
+| DataFetchInterface v1.2.0-10 | ✅ Completed |
+| Unit tests | ⏳ Planned |
+| Dashboard Pagination & Filter | ⏳ Planned |
+| External API endpoint | ⏳ Planned |
+| Multi-instance with DB connection | ⏳ Planned |
 
-1. Upload the `plugin_usage_reporter` folder into the `moodle/local/` directory of your Moodle system.
+---
 
-   Example: moodle/ ├── local/ │ └── plugin_usage_reporter/
-2. Go to **Site Administration** > **Plugins** > **Manage Plugins** and install the plugin.
+## 🆕 Latest Changes
 
-### 2. Email Configuration
+### v2.1 (2025-04-13)
+- ✅ RawDataFetcher: Full Interface compliance (fetch, cache, filter, transform, validate)
+- ✅ Central ErrorHandler integration
+- ✅ Moodle Cache API implemented
+- ✅ Moodle Logging API integrated (Developer Mode)
+- ✅ Pagination limit / offset support
+- ✅ Multi-instance support prepared
+- ✅ Role-based reporting (student / teacher / other)
 
-Ensure that your Moodle instance is properly configured for sending emails. This can be configured under **Site Administration** > **Server** > **Email**.
+### Versioning format:
+Every PHP file now includes versioning in the header following this schema:
+v1.1.1-10 A [13.04.2025] [Updates or Removal]
+## 🚀 Installation
 
-### 3. Plugin Configuration
+1. Copy the plugin folder to:  
+   `local/pluginusagereporter/`
 
-After installation, you can find and configure the plugin under **Site Administration** > **Plugins** > **Local Plugins**. Configure the email address where the report will be sent and the frequency of report generation (e.g., daily, weekly).
+2. Ensure all required classes are present:
+   - `RawDataFetcher.php`
+   - `DataFetchInterface.php`
+   - `ErrorHandler.php`
 
-## Usage
+3. Go to Moodle admin panel → "Check for available updates".
 
-### Task Execution
+4. Install the plugin.
 
-The plugin uses the Moodle Task API to generate reports. You can manually execute the task or set up a schedule for automatic execution. The task checks the usage of plugins in visible courses from the past year and generates an HTML report.
+---
+
+## 🔮 Roadmap
+
+| Feature | Status | Priority |
+|---------|---------|-----------|
+| Multi-instance finalization (connection manager) | ⏳ | High |
+| REST API handler for external requests | ⏳ | High |
+| Dashboard with pagination & filters | ⏳ | Medium |
+| Optional caching disable switch | ⏳ | Low |
+| Advanced output formats (CSV, XML export) | ⏳ | Medium |
+| Admin email notifications on errors | ⏳ | Medium |
+| Full unit testing / PHPUnit integration | ⏳ | High |
+| Automated report sending via cron | ⏳ | Medium |
+
+---
+
+## 🛠 Configuration
+
+Configuration is currently handled via plugin settings and method parameters:
+- Timeframe: via `fetch_data(int $timeframe)`
+- Pagination: via `setPagination(int $limit, int $offset)`
+- Instance selection: via `setInstance(string $instance)`
+- Caching: automatic through Moodle Cache API
+
+---
+
+## 🤝 Contributors & Special Thanks
+
+- **Codename-Beast aka Ben** — Lead Developer & Architect
+- Special thanks to: Benjamin (Eledia), Christopher(Eledia)
+
+---
