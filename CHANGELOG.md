@@ -13,7 +13,6 @@ Alle Änderungen im Plugin Usage Reporter werden hier dokumentiert.
 - ✅ ErrorHandler non-static calls corrected (IDE compliance)
 - ✅ Complete README.md and CHANGELOG.md updated to reflect current state
 - ✅ Language files EN/DE completed
-- ✅ Project production-ready, clean Savepoint
 
 ## v2.0
 
