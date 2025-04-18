@@ -1,6 +1,6 @@
 # Plugin Usage Reporter for Moodle
 
-**Version:** 2.1.1  
+**Version:** 2.1.2  
 **Last Updated:** 18.04.2025  
 **Author:** Bernd Schreistetter  
 **Compatibility:** Moodle 4.5+ and 5.0
@@ -44,9 +44,9 @@ The Plugin Usage Reporter provides a comprehensive and customizable overview of 
 | Dashboard Pagination       | ✅ Completed              |
 | Event-based Trigger        | ✅ Implemented            |
 | Unit Tests                 | ✅ Core tested            |
-| API Rate Limiting          | ⏳ Planned v2.2            |
-| API Key Security           | ⏳ Planned v2.2            |
-| CSV REST Output            | ⏳ Optional v2.2           |
+| API Rate Limiting          | ⏳ Planned v2.2           |
+| API Key Security           | ❌ Removed                |
+| CSV REST Output            | ⏳ Optional v2.2          |
 
 ---
 
@@ -68,9 +68,11 @@ The Plugin Usage Reporter provides a comprehensive and customizable overview of 
 ## 🔐 Webservice Usage
 
 ### Endpoint
-```
 /webservice/rest/server.php
-```
+
+perl
+Copy
+Edit
 
 ### Required params
 | Param                | Example                                           |
@@ -90,40 +92,38 @@ The Plugin Usage Reporter provides a comprehensive and customizable overview of 
 ### Example
 ```bash
 curl "https://yourmoodle/webservice/rest/server.php?wstoken=XXX&wsfunction=local_pluginusagereporter_get_plugin_usage_data&moodlewsrestformat=json&timeframe=90&pluginfilter=mod_quiz&limit=10"
-```
+🛠 Installation
+Place the plugin under:
 
----
+bash
+Copy
+Edit
+local/pluginusagereporter
+Run the upgrade script:
 
-## 🛠 Installation
+bash
+Copy
+Edit
+php admin/cli/upgrade.php
+Visit: Site administration → Plugins → Plugin Usage Reporter
 
-1. Place the plugin under:
-   ```
-   local/pluginusagereporter
-   ```
-2. Run the upgrade script:
-   ```bash
-   php admin/cli/upgrade.php
-   ```
-3. Visit: Site administration → Plugins → Plugin Usage Reporter
-
----
-
-## 🧭 Versioning Scheme
+🧭 Versioning Scheme
 Each PHP file contains version headers, e.g.:
-```php
-// v1.1.1-10 D [2025-04-14] [Security Fixes]
-```
-Internal plugin versioning: **v1.1.1-10 K** (last commit)
 
----
+php
+Copy
+Edit
+// [2025-04-18] [Error Handling Refactor]
+Internal plugin versioning: v1.1.1-10 K
 
-## 🔮 Roadmap for v2.2
-- [ ] API rate limiting + quota tracking
-- [ ] Token whitelist & optional API key mode
-- [ ] Grafana dashboard JSON presets
-- [ ] Full CSV output support via Webservice
-- [ ] Advanced per-course stats & aggregation
+🔮 Roadmap for v2.2
+ API rate limiting + quota tracking
 
----
+ Token whitelist & optional API key mode
 
-**Maintainer:** Bernd Schreistetter  
+ Grafana dashboard JSON presets
+
+ Full CSV output support via Webservice
+
+ Advanced per-course stats & aggregation
+
