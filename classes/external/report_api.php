@@ -47,14 +47,13 @@ class report_api extends external_api
      * @return array
      * @throws moodle_exception
      */
-    public static function get_report(string $apikey, int $timeframe, string $instance = null): array
+    public static function get_report(string $apikey, int $timeframe): array
     {
         global $DB;
 
         self::validate_parameters(self::get_report_parameters(), [
             'apikey' => $apikey,
-            'timeframe' => $timeframe,
-            'instance' => $instance
+            'timeframe' => $timeframe
         ]);
 
         $configuredKey = get_config('local_pluginusagereporter', 'external_api_key');
@@ -69,15 +68,10 @@ class report_api extends external_api
         $fetcher = new RawDataFetcher($DB);
         $fetcher->setPagination(1000, 0);
 
-        if (!empty($instance)) {
-            $fetcher->setInstance($instance);
-        }
-
         $data = $fetcher->fetch_data($timeframe);
 
         logger::add('success', 'API report successfully delivered.', [
-            'method' => 'REST API',
-            'instance' => $instance ?? 'default'
+            'method' => 'REST API'
         ]);
 
         return [

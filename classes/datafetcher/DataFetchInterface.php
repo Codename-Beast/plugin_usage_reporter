@@ -81,13 +81,4 @@ interface DataFetchInterface
      * @return self Fluent interface.
      */
     public function setPagination(int $limit, int $offset): self;
-
-    /**
-     * Sets instance name for multi-instance support.
-     *
-     * @param string $instance Instance name/identifier.
-     * @return self Fluent interface.
-     * Despcated in v1.2.0-10 A, Multi-Instance Support will be removed in future versions.
-     */
-    public function setInstance(string $instance): self;
 }

@@ -10,7 +10,6 @@
  * - Pagination support
  * - Error handling with custom ErrorHandler class
  * - Moodle Logging API for debugging
- * - Multi-instance support (prepared)
  * - Caching with Moodle Cache API
  * - Data transformation (JSON, text)
  * - Data validation
@@ -270,20 +269,6 @@ class RawDataFetcher implements DataFetchInterface
         $this->log_debug('Pagination set', ['limit' => $limit, 'offset' => $offset]);
         // Return the current instance for method chaining
         // This allows for a fluent interface, enabling method chaining.
-        return $this;
-    }
-
-    /**
-     * Sets the instance name/identifier for multi-instance support.
-     *
-     * This method is part of the fluent interface and returns the current instance.
-     *
-     * @param string $instance Instance name/identifier.
-     * @return self Fluent interface.
-     */
-    public function setInstance(string $instance): self
-    {
-        $this->instance = $instance;
         return $this;
     }
 
