@@ -1,22 +1,57 @@
 # Changelog
-## Planning for v2.2
 
+## Planning for v2.2
 - [x] Unit testing / PHPUnit integration
+- [x] Webservice implemention (**finalized** ✅)
+- [x] API refactor: Moodle Webservice only (no custom API)
+- [x] API filtering: timeframe, plugin, limit, offset
+- [x] ErrorHandler test
+- [x] Report Task Test
+- [x] REST API Test
+- [x] Cache and Logging integration
 - [ ] API rate limiting configurable
-- [x] Webservice implemention (Work In Progress)
 - [ ] Exponential backoff for retry mechanism
 - [ ] Automated report sending via cron
 
-
 Alle Änderungen im Plugin Usage Reporter werden hier dokumentiert.
+
+---
+
+## v2.2 — 2025-04-18
+### ✅ Added
+- Moodle Webservice `get_plugin_usage_data` (REST)
+- Sicherheitsprüfung via `has_capability()` und `validate_context()`
+- Parameter: `timeframe`, `pluginfilter`, `limit`, `offset`
+- Neue Unit Tests:
+  - `raw_data_fetcher_test`
+  - `generate_report_task_test`
+  - `report_api_service_test`
+  - `error_handler_test`
+- Event-Listener `PluginUsageEvent.php` → Report API trigger
+- Grafana-kompatible Ausgabe via JSON
+- Refactored caching (Moodle Cache API)
+
+### 🔧 Changed
+- Webservice nutzt vollständig PSR-4 Autoloading
+- Logging und Fehlerbehandlung zentralisiert
+- Reportstruktur modularisiert für HTML / CSV / Text / XML
+- Retry-Konfiguration über Settings steuerbar
+- Logging ersetzt direkte `mtrace()`-Ausgaben
+
+### ❌ Removed
+- Eigene API (`report_api.php`, `api_handler.php`) entfernt
+- Instanzlogik: kein `setInstance()`, keine Loops über `instances[]`
+- Keine dynamischen Cachekeys mehr mit Instanznamen
+
+---
+
 ## v2.1.1 — 2025-04-16
- - ✅ CSV / XML export via dashboard
- - [-] Multi-instance removed (not posible in Moodle)
- - ✅ Refactor Code.
- - ✅ Add Changes to CHANGELOG.md updated to reflect current state.
+- ✅ CSV / XML export via dashboard
+- ❌ Multi-instance removed (not possible in Moodle)
+- ✅ Refactor Code.
+- ✅ Add Changes to CHANGELOG.md updated to reflect current state.
 
 ## v2.1 — 2025-04-13
-
 - ✅ Event-based API trigger via course and module views
 - ✅ Retry mechanism with configurable attempts and delay
 - ✅ Dashboard: filter and pagination operational
@@ -25,8 +60,7 @@ Alle Änderungen im Plugin Usage Reporter werden hier dokumentiert.
 - ✅ Complete README.md and CHANGELOG.md updated to reflect current state
 - ✅ Language files EN/DE completed
 
-## v2.0
-
+## v2.0 — 2025-03-01
 - ✅ Major refactor for multi-instance support preparation
 - ✅ Interface-based data fetcher (RawDataFetcher.php)
 - ✅ Integration of central ErrorHandler
@@ -34,8 +68,7 @@ Alle Änderungen im Plugin Usage Reporter werden hier dokumentiert.
 - ✅ Settings structure created
 - ✅ Logging framework base added
 
-## v1.0
-
+## v1.0 — 2024-12-01
 - ✅ Initial plugin setup
 - ✅ Basic data fetching implemented
 - ✅ Plugin settings created
@@ -43,7 +76,5 @@ Alle Änderungen im Plugin Usage Reporter werden hier dokumentiert.
 - ✅ Admin interface (plugin registration)
 
 ---
-
-> Updated 16.04.2024 22:37
-> Dokumentiert am 10.02.2025
+> Updated 18.04.2025 20:45
 > Maintainer: Bernd Schreistetter
