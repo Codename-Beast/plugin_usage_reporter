@@ -70,10 +70,6 @@ The Plugin Usage Reporter provides a comprehensive and customizable overview of 
 ### Endpoint
 /webservice/rest/server.php
 
-perl
-Copy
-Edit
-
 ### Required params
 | Param                | Example                                           |
 |----------------------|---------------------------------------------------|
@@ -89,41 +85,4 @@ Edit
 | `limit`        | int    | 20         |
 | `offset`       | int    | 0          |
 
-### Example
-```bash
-curl "https://yourmoodle/webservice/rest/server.php?wstoken=XXX&wsfunction=local_pluginusagereporter_get_plugin_usage_data&moodlewsrestformat=json&timeframe=90&pluginfilter=mod_quiz&limit=10"
-🛠 Installation
-Place the plugin under:
-
-bash
-Copy
-Edit
-local/pluginusagereporter
-Run the upgrade script:
-
-bash
-Copy
-Edit
-php admin/cli/upgrade.php
-Visit: Site administration → Plugins → Plugin Usage Reporter
-
-🧭 Versioning Scheme
-Each PHP file contains version headers, e.g.:
-
-php
-Copy
-Edit
-// [2025-04-18] [Error Handling Refactor]
-Internal plugin versioning: v1.1.1-10 K
-
-🔮 Roadmap for v2.2
- API rate limiting + quota tracking
-
- Token whitelist & optional API key mode
-
- Grafana dashboard JSON presets
-
- Full CSV output support via Webservice
-
- Advanced per-course stats & aggregation
 
