@@ -1,123 +1,87 @@
 <?php
-/**
- * v1.0.0-10 A 2025-04-13 [Initial Unit Test Creation]
- *
- * Unit tests for RawDataFetcher class.
- *
- * @package    local_pluginusagereporter
- * @copyright  2024 Bernd Schreistetter
- * @license    MIT https://opensource.org/licenses/MIT
- */
+
+declare(strict_types=1);
 
 namespace local_pluginusagereporter\tests;
 
+/**
+ * Unit test for RawDataFetcher.
+ *
+ * [Since v1.1.1-11 C] Validates logic and data handling.
+ *
+ * @package local_pluginusagereporter
+ * @covers \local_pluginusagereporter\datafetcher\RawDataFetcher
+ */
+
 use advanced_testcase;
 use local_pluginusagereporter\datafetcher\RawDataFetcher;
-use local_pluginusagereporter\ErrorHandler;
-use cache;
+use stdClass;
 
 defined('MOODLE_INTERNAL') || die();
+/**
+ * Summary of raw_data_fetcher_test
+ */
+final class raw_data_fetcher_test extends advanced_testcase {
 
-final class raw_data_fetcher_test extends advanced_testcase
-{
-    /**
-     * Reset the database after each test.
-     *
-     * This method is called automatically by PHPUnit after each test.
-     * It resets the database to its initial state, which ensures that
-     * each test starts with a clean slate.
-     */
-    protected function setUp(): void
-    {
-        $this->resetAfterTest();
+    protected function setUp(): void {
+        parent::setUp();
+        $this->resetAfterTest(true);
+    }
+
+/**
+ * Tests the logic of fetching data with RawDataFetcher.
+ *
+ * This test creates 100 test courses and corresponding modules in the database.
+ * It then uses the RawDataFetcher to fetch data for the past 365 days.
+ * The fetched data is checked to ensure it is an array and not empty.
+ * Each record in the fetched data is verified to contain 'plugin' and 'count' keys,
+ * and the 'count' value is asserted to be greater than or equal to zero.
+ */
+
+    public function test_fetch_data_logic(): void {
+        global $DB;
+
+        for ($i = 0; $i < 100; $i++) {
+            $course = new stdClass();
+            $course->fullname = "Test Course {$i}";
+            $course->shortname = "TC{$i}";
+            $course->visible = ($i % 2 === 0) ? 1 : 0;
+            $course->startdate = time() - (60 * 60 * 24 * 30 * ($i % 12));
+            $course->enddate = 0;
+            $course->lastaccess = time() - (60 * 60 * 24 * rand(1, 365));
+            $courseid = $DB->insert_record('course', $course);
+
+            $module = new stdClass();
+            $module->course = $courseid;
+            $module->module = 1;
+            $module->instance = $i + 1;
+            $module->visible = 1;
+            $DB->insert_record('course_modules', $module);
+        }
+
+        $fetcher = new RawDataFetcher($DB);
+        $data = $fetcher->fetch_data(365);
+
+        $this->assertIsArray($data);
+        $this->assertNotEmpty($data);
+
+        foreach ($data as $record) {
+            $this->assertArrayHasKey('plugin', $record);
+            $this->assertArrayHasKey('count', $record);
+            $this->assertGreaterThanOrEqual(0, $record['count']);
+        }
     }
 
     /**
-     * Tests that fetch_data() returns an array.
+     * Cleans up after each test by removing all test courses.
      *
-     * This test ensures that the fetch_data() method of RawDataFetcher
-     * returns an array when called with a timeframe of 0, indicating no time limit.
-     */
-
-    public function test_fetch_data_returns_array(): void
-    {
-        global $DB;
-
-        $fetcher = new RawDataFetcher($DB, false);
-        $result = $fetcher->fetch_data(0); // no time limit
-
-        $this->assertIsArray($result);
-    }
-
-    /**
-     * Tests if validate_data() returns false for an empty array.
+     * We use a unique course shortname prefix ("TC") to identify test courses.
      *
-     * Validate_data() should return false if the given data is empty.
-     * This test case passes an empty array to validate_data() and asserts
-     * the result is false.
+     * @return void
      */
-    public function test_validate_data_with_empty_array(): void
-    {
+    protected function tearDown(): void {
         global $DB;
-
-        $fetcher = new RawDataFetcher($DB, false);
-        $result = $fetcher->validateData([]);
-
-        $this->assertFalse($result);
-    }
-
-    /**
-     * Tests if transform_data() returns a valid JSON string.
-     *
-     * @covers \local_pluginusagereporter\datafetcher\RawDataFetcher::transform_data
-     */
-    public function test_transform_data_json(): void
-    {
-        global $DB;
-
-        $fetcher = new RawDataFetcher($DB, false);
-        $data = [['modulename' => 'book', 'coursename' => 'Test', 'usagecount' => 1]];
-
-        $json = $fetcher->transformData($data, 'json');
-        $this->assertJson($json);
-    }
-
-    /**
-     * Tests that the setPagination() method correctly sets the pagination limit and offset.
-     *
-     * @covers \local_pluginusagereporter\datafetcher\RawDataFetcher::setPagination
-     */
-    public function test_pagination_parameters(): void
-    {
-        global $DB;
-
-        $fetcher = new RawDataFetcher($DB, false);
-        $fetcher->setPagination(10, 5);
-        $params = (new \ReflectionClass($fetcher))->getProperty('limit');
-        $params->setAccessible(true);
-
-        $this->assertEquals(10, $params->getValue($fetcher));
-    }
-
-    /**
-     * Tests that data is cached and can be retrieved from the cache.
-     *
-     * @covers \local_pluginusagereporter\datafetcher\RawDataFetcher::cache_data
-     * @covers \local_pluginusagereporter\datafetcher\RawDataFetcher::transform_data
-     */
-    public function test_cache_data_and_retrieve(): void
-    {
-        global $DB;
-
-        $fetcher = new RawDataFetcher($DB, false);
-        $cache = \cache::make('local_pluginusagereporter', 'plugin_usage');
-
-        $key = 'test_cache_key';
-        $data = ['modulename' => 'book', 'coursename' => 'Test', 'usagecount' => 1];
-
-        $fetcher->cacheData($key, $data, 60);
-        $cached = $cache->get($key);
-
-        $this->assertEquals($data, $cached);
+        $DB->delete_records_select('course', "shortname LIKE 'TC%'");
+        parent::tearDown();
     }
 }

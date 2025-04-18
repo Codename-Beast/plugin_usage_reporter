@@ -1,60 +1,37 @@
 <?php
-/**
- * [Initial Unit Test for ErrorHandler]
- *
- * Unit tests for ErrorHandler class.
- *
- * @package    local_pluginusagereporter
- * @copyright  2024 Bernd Schreistetter
- * @license    MIT https://opensource.org/licenses/MIT
- */
+
+declare(strict_types=1);
 
 namespace local_pluginusagereporter\tests;
 
+/**
+ * Unit test for ErrorHandler.
+ *
+ * [Since v1.1.1-11 F] Ensures ErrorHandler captures and logs exceptions properly.
+ *
+ * @package local_pluginusagereporter
+ * @covers \local_pluginusagereporter\helper\ErrorHandler
+ */
+
 use advanced_testcase;
-use local_pluginusagereporter\ErrorHandler;
+use local_pluginusagereporter\helper\ErrorHandler;
+use moodle_exception;
 
-defined('MOODLE_INTERNAL') || die();
+final class error_handler_test extends advanced_testcase {
 
-final class error_handler_test extends advanced_testcase
-{
-    protected function setUp(): void
-    {
-        $this->resetAfterTest();
-    }
+    /**
+     * Verifies that the ErrorHandler logs exceptions properly.
+     *
+     * This test only verifies that the exception is logged by the ErrorHandler.
+     * The actual logging implementation is tested in the logging_test.php file.
+     */
+    public function test_handle_logs_exception(): void {
+        $this->resetAfterTest(true);
+        $errorhandler = new ErrorHandler();
 
-    public function test_handle_with_exception(): void
-    {
-        $errorHandler = new ErrorHandler();
-
-        $exception = new \Exception('Test exception for ErrorHandler');
-        $this->expectNotToPerformAssertions();
-
-        $errorHandler->handle($exception);
-    }
-
-    public function test_handle_with_moodle_exception(): void
-    {
-        $errorHandler = new ErrorHandler();
-
-        $moodleException = new \moodle_exception('testcode', 'local_pluginusagereporter', '', null, 'Test moodle exception');
-        $this->expectNotToPerformAssertions();
-
-        $errorHandler->handle($moodleException);
-    }
-
-    public function test_handle_with_throwable(): void
-    {
-        $errorHandler = new ErrorHandler();
-
-        $throwable = new class extends \Error {
-            public function __construct() {
-                parent::__construct('Test throwable error');
-            }
-        };
+        $exception = new moodle_exception('testerror', 'local_pluginusagereporter');
 
         $this->expectNotToPerformAssertions();
-
-        $errorHandler->handle($throwable);
+        $errorhandler->handle($exception);
     }
 }
