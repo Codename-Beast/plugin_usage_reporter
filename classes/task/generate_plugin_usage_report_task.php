@@ -30,10 +30,6 @@ use local_pluginusagereporter\datafetcher\RawDataFetcher;
  */
 class generate_plugin_usage_report_task extends scheduled_task {
 
-
-    public function __construct() {
-        
-    }
     /**
      * Get task name for admin interface.
      *
