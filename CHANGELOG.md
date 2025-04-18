@@ -13,6 +13,20 @@
 All notable changes to the Plugin Usage Reporter plugin are documented here.
 
 ---
+## v2.1.2 — 2025-04-18
+### 🛠️ Fixes
+- Corrected `riskbitmask` in `access.php` from `RISK_SPAM` to `RISK_CONFIG`
+- Removed deprecated `local_pluginusagereporter_cron()` function (tasks only)
+- Documented version timestamp in `version.php` for dev branch use
+- `dashboard.php` now respects `enable_caching` setting before writing cache
+- Removed obsolete JSON instance setting (multi-instance support deprecated)
+- Removed unused `usematerializedview` setting and related lang strings
+- Cleaned up language string set (cronjobmessage, etc.) and ensured completeness
+- Deleted unused `external_api_key` setting (Webservice tokens now default)
+- Improved error handling with:
+  - Structured fallback logic
+  - Sensitive data masking in error messages
+  - Logging via internal `logger::add()` calls
 
 ## v2.1.1 — 2025-04-18
 ### ✅ Added
