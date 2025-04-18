@@ -27,7 +27,7 @@
  defined('MOODLE_INTERNAL') || die();
 
  $plugin->component = 'local_pluginusagereporter';
- $plugin->version = 2025041300;
- $plugin->release = 'v2.1';
+ $plugin->version = 2025041300; // Entwicklungs-Release für 13. April 2025 (v2.2 dev)
+ $plugin->release = 'v2.1.1';
  $plugin->maturity = MATURITY_STABLE;
  $plugin->requires = 2022041900; // Moodle 4.5+

@@ -3,7 +3,7 @@
  *  [Initial Class Creation]
  *
  * ErrorHandler class.
- *
+ * v1.1.1-10 I 2025-04-18 [Error Handling Improvements]
  * Features:
  * - Centralized error handling for the Plugin Usage Reporter.
  * - Logs all errors using Moodle's Logging API.
@@ -15,74 +15,40 @@
  * @license    MIT https://opensource.org/licenses/MIT
  */
 
-namespace local_pluginusagereporter;
+ namespace local_pluginusagereporter;
 
-defined('MOODLE_INTERNAL') || die();
-
-use Throwable;
-use moodle_exception;
-use local_pluginusagereporter\logger;
-use local_pluginusagereporter\notifier;
-
-class ErrorHandler
-{
-    /**
-     * Handles any throwable error or exception.
-     *
-     * @param Throwable $exception
-     * @return void
-     */
-    public function handle(Throwable $exception): void
-    {
-        $message = sprintf(
-            'Error: %s in %s on line %d',
-            $exception->getMessage(),
-            $exception->getFile(),
-            $exception->getLine()
-        );
-
-        // Log error to Moodle debugging
-        debugging($message, DEBUG_DEVELOPER);
-
-       // Advanced Moodle logging or notifications
-        $this->log_to_moodle($message, $exception);
-
-        // Log error to custom logger
-        logger::add('error', $exception->getMessage(), [
-            'file' => $exception->getFile(),
-            'line' => $exception->getLine()
-        ]);
-
-        // [Since v1.1.1-10 E] Send email notification if enabled
-        notifier::send(
-            'Plugin Usage Reporter Error',
-            $exception->getMessage()
-        );
-
-        // Optional: Rethrow the exception if needed
-        // throw $exception;
-    }
-
-    /**
-     * Logs the error details using Moodle logging.
-     *
-     * @param string $message
-     * @param Throwable|null $exception
-     * @return void
-     */
-    private function log_to_moodle(string $message, ?Throwable $exception = null): void
-    {
-        if (PHPUNIT_TEST) {
-            // Skip logging in PHPUnit tests
-            return;
-        }
-
-        \core\notification::error($message);
-
-        if ($exception instanceof moodle_exception) {
-            // Optionally extend for moodle_exception specifics
-            debugging('Moodle Exception Debug Data: ' . json_encode($exception->getDebugInfo()), DEBUG_DEVELOPER);
-        }
-    }
-
-}
+ class ErrorHandler {
+ 
+     /**
+      * [Since v1] Handles throwable errors with logging and optional fallback messaging.
+      *
+      * @param \Throwable $e
+      * @return void
+      */
+     public function handle(\Throwable $e): void {
+         // Clean up sensitive data (basic placeholder, can be expanded).
+         $message = $this->sanitize_message($e->getMessage());
+ 
+         // Developer mode debugging.
+         debugging('Plugin Usage Reporter Error: ' . $message, DEBUG_DEVELOPER);
+ 
+         // Moodle log entry.
+         \core\notification::add('An error occurred. Check site logs.', \core\output\notification::NOTIFY_ERROR);
+ 
+         // Custom plugin log (db table if needed).
+         logger::add('error', $message, ['file' => $e->getFile(), 'line' => $e->getLine()]);
+     }
+ 
+     /**
+      * [Since v1.1.1-10 I] Basic message sanitization (prevent full SQL leakage).
+      *
+      * @param string $message
+      * @return string
+      */
+     private function sanitize_message(string $message): string {
+         // Remove potential SQL or token-like data
+         $patterns = ['/SELECT .* FROM/i', '/INSERT INTO/i', '/UPDATE .* SET/i', '/DELETE FROM/i'];
+         return preg_replace($patterns, '[SQL]', $message);
+     }
+ }
+ 

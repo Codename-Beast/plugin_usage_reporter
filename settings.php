@@ -67,13 +67,6 @@ if ($hassiteconfig) {
         PARAM_INT
     ));
 
-    //[Since v1] Materialized View optimization
-    $settings->add(new admin_setting_configcheckbox(
-        'local_pluginusagereporter/usematerializedview',
-        get_string('usematerializedview', 'local_pluginusagereporter'),
-        get_string('usematerializedview_desc', 'local_pluginusagereporter'),
-        0 // Default: disabled
-    ));
 
     //[Since v1]Email report format selection
     $settings->add(new admin_setting_configselect(
@@ -104,14 +97,6 @@ if ($hassiteconfig) {
         PARAM_URL
     ));
 
-    //[Since v1.1.1-10 A]: External API Key
-    $settings->add(new admin_setting_configpasswordunmask(
-        'local_pluginusagereporter/external_api_key',
-        'External API Access Key',
-        'The API key for authentication with the external system.',
-        ''
-    ));
-
     // [Since v1.1.1-10 A]: Scheduled Task enable/disable
     $settings->add(new admin_setting_configcheckbox(
         'local_pluginusagereporter/enable_scheduled_task',
@@ -129,13 +114,6 @@ if ($hassiteconfig) {
         get_string('dashboardtitle', 'local_pluginusagereporter'),
         new moodle_url('/local/pluginusagereporter/dashboard.php'),
         'local/pluginusagereporter:view'
-    ));
-    //[Since v1] Add API link to admin navigation
-    $settings->add(new admin_setting_configtextarea(
-        'local_pluginusagereporter/instances',
-        'Moodle Instances Configuration',
-        'Define instances in JSON format. Example: {"instance1":{"dbhost":"localhost","dbname":"moodle1","dbuser":"user","dbpass":"pass"},"instance2":{"dbhost":"localhost","dbname":"moodle2","dbuser":"user","dbpass":"pass"}}',
-        '{}'
     ));
 
     // [Since v1.1.1-10 E]: Enable email notifications for API / report events

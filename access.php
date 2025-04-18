@@ -32,7 +32,7 @@ $capabilities = array(
 
     // Capability to execute the report task manually
     'local/pluginusagereporter:execute' => array(
-        'riskbitmask' => RISK_SPAM,      // Risk of sending emails
+        'riskbitmask' => RISK_CONFIG | RISK_DATALOSS,   // Risk of data loss or configuration changes
         'captype' => 'write',
         'contextlevel' => CONTEXT_SYSTEM,
         'archetypes' => array(

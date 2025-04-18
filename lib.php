@@ -25,13 +25,16 @@
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * This function logs a message about the plugin's background task.
- * The task is automatically scheduled via tasks.xml.
- */
-function local_pluginusagereporter_cron(): void {
-    // Log a message about the scheduled task.
-    mtrace(get_string('cronjobmessage', 'local_pluginusagereporter'));
-}
+ * Deprecated cron function.
+ * All functionality is implemented in scheduled tasks.
+ * This file is kept for compatibility, but contains no executable code.
+ *
+ * @package local_pluginusagereporter
+ *function local_pluginusagereporter_cron(): void {
+ *   // Log a message about the scheduled task.
+ *  mtrace(get_string('cronjobmessage', 'local_pluginusagereporter'));
+*}
+*/
 
 /**
  * This function is executed during the plugin's installation.

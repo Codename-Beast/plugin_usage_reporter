@@ -1,12 +1,13 @@
 <?php
 /**
- * v1.1.1-10 H 2025-04-13 [Dashboard Filter & Pagination]
+ * v1.1.1-10 I 2025-04-18 [Caching Setting Respected]
  *
  * Dashboard for Plugin Usage Reporter.
  *
  * Features:
  * - Manual report trigger
  * - Filterable and paginated log history
+ * - Conditional caching based on plugin settings
  *
  * @package    local_pluginusagereporter
  * @copyright  2024 Bernd Schreistetter
@@ -45,7 +46,10 @@ if (optional_param('sendreport', false, PARAM_BOOL)) {
         $timeframe = (int) get_config('local_pluginusagereporter', 'timeframe');
         $data = $fetcher->fetchData($timeframe);
 
-        $fetcher->cacheData('manual_dashboard_trigger', $data, 3600);
+        // [Since v1.1.1-10 I] Conditional caching based on plugin settings
+        if (get_config('local_pluginusagereporter', 'enable_caching')) {
+            $fetcher->cacheData('manual_dashboard_trigger', $data, 3600);
+        }
 
         if (get_config('local_pluginusagereporter', 'enable_external_api')) {
             $api = new api_handler();

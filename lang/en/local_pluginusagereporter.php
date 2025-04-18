@@ -64,6 +64,7 @@ $string['cronjobnotfound'] = 'Scheduled task {$a} was not found';
 $string['cronjobregistered'] = 'Scheduled task {$a} was successfully registered';
 $string['cronjobnotfoundexception'] = 'The scheduled task could not be registered';
 $string['adminusernotfound'] = 'Admin user could not be found.';
+
 //Admin Dashboard 
 $string['dashboardtitle'] = 'Plugin Usage Dashboard';
 $string['action_details'] = 'View Details';
@@ -77,10 +78,6 @@ $string['actions'] = 'Actions';
 $string['manualtrigger'] = 'Generate and Send Report Manually';
 $string['manualtrigger_desc'] = 'Click to manually generate and send the plugin usage report.';
 //$string['manualtrigger_success'] = 'Manual report generation and sending successful.';
-$string['invalidapikey'] = 'Invalid API key provided.';
-$string['apidescription'] = 'Provides plugin usage data for external monitoring systems.';
-$string['instances'] = 'Moodle Instances Configuration';
-$string['instances_desc'] = 'Define multiple Moodle instances in JSON format for cross-instance reporting.';
 // [Since v1.1.1-10 E]: Notification settings
 $string['enable_notifications'] = 'Enable Email Notifications';
 $string['enable_notifications_desc'] = 'Send email notifications for report events and API triggers.';
