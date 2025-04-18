@@ -43,9 +43,9 @@ if (optional_param('sendreport', false, PARAM_BOOL)) {
     try {
         $fetcher = new RawDataFetcher($GLOBALS['DB']);
         $timeframe = (int) get_config('local_pluginusagereporter', 'timeframe');
-        $data = $fetcher->fetch_data($timeframe);
+        $data = $fetcher->fetchData($timeframe);
 
-        $fetcher->cache_data('manual_dashboard_trigger', $data, 3600);
+        $fetcher->cacheData('manual_dashboard_trigger', $data, 3600);
 
         if (get_config('local_pluginusagereporter', 'enable_external_api')) {
             $api = new api_handler();

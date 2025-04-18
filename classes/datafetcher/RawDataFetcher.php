@@ -25,7 +25,7 @@ namespace local_pluginusagereporter\datafetcher;
 
 defined('MOODLE_INTERNAL') || die();
 
-use moodle_exception;
+// Removed moodle_exception as it is not used correctly.
 use dml_exception;
 use cache;
 use local_pluginusagereporter\ErrorHandler;
@@ -38,6 +38,13 @@ class RawDataFetcher implements DataFetchInterface
     private cache $cache;
     private ErrorHandler $errorHandler;
 
+    /**
+     * Constructor.
+     *
+     * @param \moodle_database $db Moodledatabase object
+     * @param bool $enableTimeLimit Enable time limit for data fetching (default: true)
+     * @param int $timeLimitDays Number of days to limit data fetching (default: 365)
+     */
     public function __construct(
         private \moodle_database $db,
         private bool $enableTimeLimit = true,
@@ -63,10 +70,12 @@ class RawDataFetcher implements DataFetchInterface
      */
     public function fetchData(int $timeframe): array
     {
-        #if (!empty($this->instance)) {
-        #    $this->connect_to_instance($this->instance);
-        #}
-
+        // Validate the timeframe parameter to ensure it's not negative.
+        // Dirty version will be moved to validateData method
+        if ($timeframe < 0) {
+            $this->log_error('Unsupported timeframe: ' . $timeframe);
+            $this->errorHandler->handle(new \Exception('Unsupported timeframe: ' . $timeframe));
+        }
         try {
             // Check if caching is enabled
             $cachingEnabled = (bool) get_config('local_pluginusagereporter', 'enable_caching');
@@ -82,14 +91,21 @@ class RawDataFetcher implements DataFetchInterface
                 }
                 $this->log_debug('Cache miss for key: ' . $cacheKey);
             }
-
+            // Build the SQL query and parameters
+            // This method constructs the SQL query based on the provided timeframe and other parameters.
             $params = $this->build_query_params($timeframe);
+            // Execute the SQL query to fetch raw plugin usage data
+            // The query is built using the build_sql_query method, which takes the parameters as input.
             $sql = $this->build_sql_query($params);
-
+            // Log the SQL query and parameters for debugging purposes
+            // This is useful for tracking the execution of SQL queries and their parameters.
             $this->log_debug('Executing SQL query', ['sql' => $sql, 'params' => $params]);
-
+            // Execute the SQL query and retrieve the raw plugin usage data
             $result = $this->db->get_records_sql($sql, $params) ?: [];
-
+            // Log the number of records fetched
+            $this->log_debug('Fetched ' . count($result) . ' records');
+            // If caching is enabled, store the result in the cache with the specified TTL
+            // This allows for faster retrieval of data in subsequent requests.
             if ($cachingEnabled) {
                 $this->cache->set($cacheKey, $result, $cacheTTL);
                 $this->log_debug('Data cached', ['key' => $cacheKey, 'ttl' => $cacheTTL]);
@@ -132,7 +148,7 @@ class RawDataFetcher implements DataFetchInterface
      *               an empty array is returned.
      */
 
-    public function filter_data(array $criteria): array
+    public function filterData(array $criteria): array
     {
         $data = $this->cache->get('plugin_usage') ?: [];
 
@@ -158,7 +174,7 @@ class RawDataFetcher implements DataFetchInterface
     * @return mixed Returns the transformed data in the specified format or handles an error if the format is unsupported.
     * @throws moodle_exception If the given format is not supported
     */
-    public function transform_data(array $data, string $format)
+    public function transformData(array $data, string $format)
     {
         switch (strtolower($format)) {
             case 'json':
@@ -197,7 +213,7 @@ class RawDataFetcher implements DataFetchInterface
                 return $xml->asXML();
 
             default:
-                $this->errorHandler->handle(new moodle_exception('Unsupported format: ' . $format));
+                $this->errorHandler->handle(new \Exception('Unsupported format: ' . $format));
                 return null;
         }
     }

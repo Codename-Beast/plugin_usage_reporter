@@ -16,13 +16,10 @@ namespace local_pluginusagereporter\task;
 defined('MOODLE_INTERNAL') || die();
 
 use core\task\scheduled_task;
-use core\message\message;
-use moodle_exception;
 use stdClass;
 use local_pluginusagereporter\external\api_handler;
 use local_pluginusagereporter\{ErrorHandler,logger};
-use local_pluginusagereporter\datafetcher\{DataFetchInterface, MaterializedViewFetcher, RawDataFetcher};
-use local_pluginusagereporter\reportgenerator\{ReportGeneratorInterface, HtmlReportGenerator, TextReportGenerator};
+use local_pluginusagereporter\datafetcher\RawDataFetcher;
 
 /**
  * Scheduled task to generate and send plugin usage reports.
@@ -45,106 +42,79 @@ class generate_plugin_usage_report_task extends scheduled_task {
     public function get_name() {
         return get_string('taskname', 'local_pluginusagereporter');
     }
-
     /**
-    * Main task execution handler.
-    * Fetches plugin usage data, generates a report, saves it, and sends via email.
-    * [Since v1.1.1-10 F] Execute the scheduled task with configurable retry mechanism.
-    * 
-    *
-    * @return void
-    */
-    public function execute(): void
-    {
-        global $DB;
-    
-        try {
-            $instancesJson = get_config('local_pluginusagereporter', 'instances');
-            $instances = !empty($instancesJson) ? json_decode($instancesJson, true) : [];
-    
-            // If no instances configured, fallback to default
-            if (empty($instances)) {
-                $instances = ['default' => null];
-            }
-    
-            $maxRetries = (int) get_config('local_pluginusagereporter', 'retry_attempts') ?: 3;
-            $retryDelay = (int) get_config('local_pluginusagereporter', 'retry_delay') ?: 2;
-    
-            foreach ($instances as $instanceName => $instanceConfig) {
-                mtrace("Processing instance: {$instanceName}");
-                logger::add('success', "Processing instance: {$instanceName}");
-    
-                $fetcher = new RawDataFetcher($DB);
-                if ($instanceName !== 'default') {
-                    $fetcher->setInstance($instanceName);
-                }
-    
-                $timeframe = (int) get_config('local_pluginusagereporter', 'timeframe');
-                $data = $fetcher->fetch_data($timeframe);
-                $datacount = is_array($data) ? count($data) : 0;
-    
-                logger::add('success', "Data fetched for instance: {$instanceName}. Records: {$datacount}", [
-                    'instance' => $instanceName,
-                    'recordcount' => $datacount
-                ]);
-    
-                $fetcher->cache_data("plugin_usage_report_task_{$instanceName}", $data, 3600);
-    
-                $attempt = 0;
-                $success = false;
-    
-                if (get_config('local_pluginusagereporter', 'enable_external_api')) {
-                    $apiHandler = new api_handler();
-    
-                    while ($attempt < $maxRetries && !$success) {
-                        try {
-                            $attempt++;
-                            $success = $apiHandler->send_report($data);
-    
-                            if ($success) {
-                                logger::add('success', "API report successfully sent for instance: {$instanceName}", [
-                                    'method' => 'scheduled task',
-                                    'attempt' => $attempt,
-                                    'instance' => $instanceName
-                                ]);
-                                mtrace("API report successfully sent for instance: {$instanceName}");
-                                break;
-                            } else {
-                                mtrace("Attempt {$attempt} failed for instance: {$instanceName}");
-                            }
-                        } catch (\Throwable $e) {
-                            logger::add('error', "Attempt {$attempt} failed for instance: {$instanceName}. Error: " . $e->getMessage(), [
-                                'method' => 'scheduled task',
-                                'attempt' => $attempt,
-                                'instance' => $instanceName
-                            ]);
-                            mtrace("Attempt {$attempt} error for instance: {$instanceName} - " . $e->getMessage());
-                        }
-    
-                        if (!$success && $attempt < $maxRetries) {
-                            mtrace("Waiting {$retryDelay} seconds before next attempt...");
-                            sleep($retryDelay);
-                        }
+ * Main task execution handler.
+ * Fetches plugin usage data, generates a report, saves it, and sends via email.
+ * [Since v1.1.1-11 A] Instance logic removed. Executes task for default context only.
+ *
+ * @return void
+ */
+public function execute(): void {
+    global $DB;
+
+    try {
+        $timeframe = (int) get_config('local_pluginusagereporter', 'timeframe');
+        $maxRetries = (int) get_config('local_pluginusagereporter', 'retry_attempts') ?: 3;
+        $retryDelay = (int) get_config('local_pluginusagereporter', 'retry_delay') ?: 2;
+
+        $fetcher = new RawDataFetcher($DB);
+        $data = $fetcher->fetchData($timeframe);
+        $datacount = is_array($data) ? count($data) : 0;
+
+        logger::add('success', "Data fetched. Records: {$datacount}", [
+            'recordcount' => $datacount
+        ]);
+
+        $fetcher->cacheData("plugin_usage_report_task_default", $data, 3600);
+
+        $attempt = 0;
+        $success = false;
+
+        if (get_config('local_pluginusagereporter', 'enable_external_api')) {
+            $apiHandler = new api_handler();
+
+            while ($attempt < $maxRetries && !$success) {
+                try {
+                    $attempt++;
+                    $success = $apiHandler->send_report($data);
+
+                    if ($success) {
+                        logger::add('success', "API report successfully sent.", [
+                            'method' => 'scheduled task',
+                            'attempt' => $attempt
+                        ]);
+                        mtrace("API report successfully sent.");
+                        break;
                     }
-                }
-    
-                if (!$success && get_config('local_pluginusagereporter', 'enable_external_api')) {
-                    logger::add('error', "API report failed after all retries for instance: {$instanceName}", [
+
+                    mtrace("Attempt {$attempt} failed.");
+                } catch (\Throwable $e) {
+                    logger::add('error', "Attempt {$attempt} failed. Error: " . $e->getMessage(), [
                         'method' => 'scheduled task',
-                        'instance' => $instanceName
+                        'attempt' => $attempt
                     ]);
-                    mtrace("API report failed after all retries for instance: {$instanceName}");
+                    mtrace("Attempt {$attempt} error - " . $e->getMessage());
                 }
-    
-                mtrace("Instance {$instanceName} completed.");
+
+                if (!$success && $attempt < $maxRetries) {
+                    mtrace("Waiting {$retryDelay} seconds before next attempt...");
+                    sleep($retryDelay);
+                }
             }
-    
-            mtrace('Plugin Usage Reporter Task: Completed.');
-    
-        } catch (\Throwable $e) {
-            // Handle exceptions and log errors.
-            (new ErrorHandler())->handle($e);
-            mtrace('Plugin Usage Reporter Task: Fatal error - ' . $e->getMessage());
+
+            if (!$success) {
+                logger::add('error', "API report failed after all retries.", [
+                    'method' => 'scheduled task'
+                ]);
+                mtrace("API report failed after all retries.");
+            }
         }
+
+        mtrace('Plugin Usage Reporter Task: Completed.');
+
+    } catch (\Throwable $e) {
+        (new ErrorHandler())->handle($e);
+        mtrace('Plugin Usage Reporter Task: Fatal error - ' . $e->getMessage());
     }
+}
 }

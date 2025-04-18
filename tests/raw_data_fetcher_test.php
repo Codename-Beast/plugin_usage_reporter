@@ -78,7 +78,7 @@ final class raw_data_fetcher_test extends advanced_testcase
         $fetcher = new RawDataFetcher($DB, false);
         $data = [['modulename' => 'book', 'coursename' => 'Test', 'usagecount' => 1]];
 
-        $json = $fetcher->transform_data($data, 'json');
+        $json = $fetcher->transformData($data, 'json');
         $this->assertJson($json);
     }
 
@@ -115,7 +115,7 @@ final class raw_data_fetcher_test extends advanced_testcase
         $key = 'test_cache_key';
         $data = ['modulename' => 'book', 'coursename' => 'Test', 'usagecount' => 1];
 
-        $fetcher->cache_data($key, $data, 60);
+        $fetcher->cacheData($key, $data, 60);
         $cached = $cache->get($key);
 
         $this->assertEquals($data, $cached);
