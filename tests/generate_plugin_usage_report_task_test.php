@@ -52,7 +52,7 @@ class local_pluginusagereporter_generate_plugin_usage_report_task_test extends a
      * 2. Run the task
      * 3. Validate the email
      */
-    public function test_email_sending() {
+    public function test_email_sending(): void {
         // Configure email mock
         unset_config('noemailever');
         $sink = $this->redirectEmails();

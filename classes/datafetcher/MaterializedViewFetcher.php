@@ -36,7 +36,7 @@ class MaterializedViewFetcher implements DataFetchInterface {
      * @return array An array of records from the materialized view.
      * @throws moodle_exception If an error occurs while fetching data.
      */
-    public function fetch_data(int $timeframe): array {
+    public function fetchData(int $timeframe): array {
         global $DB;
 
         try {

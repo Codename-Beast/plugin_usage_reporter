@@ -1,6 +1,6 @@
 <?php
 /**
- * v1.2.0-10 A 2025-04-13 [Extension for Pagination, Multi-Instance, ErrorHandling]
+ * v1.2.0-10 A 2025-04-13 [Extension for Pagination, ErrorHandling, Caching, and Filtering]
  *
  * DataFetchInterface defines the structure for fetching and processing plugin usage data.
  *
@@ -11,8 +11,9 @@
  * - Transformation (output formats)
  * - Validation
  * - NEW: Pagination support
- * - NEW: Multi-instance support
+ * - NEW: Multi-instance support will be removed in future versions
  * - NEW: ErrorHandler integration
+ * - ToDo: Refactor code to use a more efficient data structure for caching and filtering
  *
  * Scheduled task to generate and send plugin usage reports.
  * Features:
@@ -32,11 +33,11 @@ interface DataFetchInterface
 {
     /**
      * Fetches plugin usage data.
-     *
+     * @ToDo implement check to make sure User can't use negative Timeframe Input
      * @param int $timeframe The number of days to look back.
      * @return array Fetched plugin usage data.
      */
-    public function fetch_data(int $timeframe): array;
+    public function fetchData(int $timeframe): array;
 
     /**
      * Applies caching to store and retrieve data efficiently.
@@ -71,8 +72,7 @@ interface DataFetchInterface
      * @param array $data The data to validate.
      * @return bool Returns true if data is valid, otherwise false.
      */
-    public function validate_data(array $data): bool;
-
+    public function validateData(array $data): bool;
     /**
      * Sets pagination parameters.
      *
@@ -87,6 +87,7 @@ interface DataFetchInterface
      *
      * @param string $instance Instance name/identifier.
      * @return self Fluent interface.
+     * Despcated in v1.2.0-10 A, Multi-Instance Support will be removed in future versions.
      */
     public function setInstance(string $instance): self;
 }

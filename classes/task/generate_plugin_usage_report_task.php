@@ -1,16 +1,13 @@
 <?php
 // This file is part of Moodle - http://moodle.org/
-//
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-//
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-//
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -35,6 +32,11 @@ use local_pluginusagereporter\reportgenerator\{ReportGeneratorInterface, HtmlRep
  * @license    MIT https://opensource.org/licenses/MIT
  */
 class generate_plugin_usage_report_task extends scheduled_task {
+
+
+    public function __construct() {
+        
+    }
     /**
      * Get task name for admin interface.
      *
@@ -48,14 +50,13 @@ class generate_plugin_usage_report_task extends scheduled_task {
     * Main task execution handler.
     * Fetches plugin usage data, generates a report, saves it, and sends via email.
     * [Since v1.1.1-10 F] Execute the scheduled task with configurable retry mechanism.
-    * [Since v1.1.1-10 J] Execute the scheduled task with multi-instance support.
+    * 
     *
     * @return void
     */
     public function execute(): void
     {
         global $DB;
-        mtrace('Plugin Usage Reporter Task: Start');
     
         try {
             $instancesJson = get_config('local_pluginusagereporter', 'instances');
@@ -146,37 +147,4 @@ class generate_plugin_usage_report_task extends scheduled_task {
             mtrace('Plugin Usage Reporter Task: Fatal error - ' . $e->getMessage());
         }
     }
-    
-    /**
-     * Send report via email.
-     *
-     * @param string $email_conf The recipient email address.
-     * @param array $report The generated report data.
-     *
-     *private function send_email_report(string $email_conf, array $report): void {
-     *   $message = new message();
-     *   $message->component = 'local_pluginusagereporter';
-     *   $message->name = 'plugin_usage_report';
-     *   $message->userfrom = \core_user::get_noreply_user();
-     *   $message->userto = $email_conf;
-     *   $message->subject = get_string('emailsubject', 'local_pluginusagereporter');
-     *   
-     *   // Determine message format (plaintext or HTML).
-     *   $message->fullmessage = $report['format'] === 'text' ? $report['report'] : strip_tags($report['report']);
-     *   $message->fullmessagehtml = $report['format'] === 'html' ? $report['report'] : '';
-     *   $message->fullmessageformat = FORMAT_HTML;
-     *   $message->notification = 1;
-
-     *  // Attempt to send email and log the result with message_send() return value.
-     *   $result = message_send($message);
-     *   if ($result === false) {
-     *       mtrace(get_string('emailerror', 'local_pluginusagereporter'));
-     *       error_log("Email sending failed for: " . $email_conf . " - Error: " . print_r($message, true));
-     *   } elseif (is_numeric($result) && $result > 0) {
-     *       error_log("Email successfully sent to: " . $email_conf . " - Message ID: " . $result);
-     *   } else {
-     *       error_log("Unexpected response from message_send() for: " . $email_conf . " - Response: " . print_r($result, true));
-     *   }
-     *}
-     */
 }

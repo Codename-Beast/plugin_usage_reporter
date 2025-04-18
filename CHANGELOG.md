@@ -1,11 +1,22 @@
 # Changelog
+## Planning for v2.2
+
+- [x] Unit testing / PHPUnit integration
+- [ ] API rate limiting configurable
+- [x] Webservice implemention (Work In Progress)
+- [ ] Exponential backoff for retry mechanism
+- [ ] Automated report sending via cron
+
 
 Alle Änderungen im Plugin Usage Reporter werden hier dokumentiert.
+## v2.1.1 — 2025-04-16
+ - ✅ CSV / XML export via dashboard
+ - [-] Multi-instance removed (not posible in Moodle)
+ - ✅ Refactor Code.
+ - ✅ Add Changes to CHANGELOG.md updated to reflect current state.
 
 ## v2.1 — 2025-04-13
 
-- ✅ Multi-instance processing fully active (task & API)
-- ✅ Pro-instance logging (records processed per instance)
 - ✅ Event-based API trigger via course and module views
 - ✅ Retry mechanism with configurable attempts and delay
 - ✅ Dashboard: filter and pagination operational
@@ -33,14 +44,6 @@ Alle Änderungen im Plugin Usage Reporter werden hier dokumentiert.
 
 ---
 
-## Planning for v2.2
-
-- [x] CSV / XML export via dashboard (Work in Progress)
-- [ ] Unit testing / PHPUnit integration
-- [ ] API rate limiting configurable
-- [ ] Per-instance API keys
-- [ ] Exponential backoff for retry mechanism
-- [ ] Automated report sending via cron
-
-> Dokumentiert am 13.04.2025
+> Updated 16.04.2024 22:37
+> Dokumentiert am 10.02.2025
 > Maintainer: Bernd Schreistetter

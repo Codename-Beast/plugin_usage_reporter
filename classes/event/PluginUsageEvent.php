@@ -59,7 +59,8 @@ class PluginUsageEvent
             }
 
         } catch (\Throwable $e) {
-            ErrorHandler::handle($e);
+            // Log the error
+            (new ErrorHandler())->handle(new \Exception($error));
         }
     }
 }

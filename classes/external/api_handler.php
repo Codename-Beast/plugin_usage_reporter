@@ -3,6 +3,7 @@
  * v1.1.1-10 J 2025-04-13 [Initial API Handler]
  *
  * API Handler class for external API interactions.
+ * Deprecated in favor of the Moodle Webservice API for v2.2
  *
  * @package    local_pluginusagereporter
  * @copyright  2024 Bernd Schreistetter
@@ -62,7 +63,7 @@ class api_handler
             curl_close($ch);
 
             logger::add('error', "API request failed: {$error}");
-            (new ErrorHandler())->handle(new \moodle_exception($error));
+            (new ErrorHandler())->handle(new \Exception($error));
 
             return false;
         }
@@ -75,7 +76,7 @@ class api_handler
             return true;
         } else {
             logger::add('error', "API request failed. HTTP Status: {$httpcode}, Response: {$response}");
-            (new ErrorHandler())->handle(new \moodle_exception("HTTP {$httpcode}: {$response}"));
+            (new ErrorHandler())->handle(new \Exception("HTTP {$httpcode}: {$response}"));
 
             return false;
         }

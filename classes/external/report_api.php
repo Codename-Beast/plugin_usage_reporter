@@ -112,6 +112,7 @@ class report_api extends external_api
 
     /**
      * [Since v1.0.0-10 A] Define API response format.
+     * Deprecated in favor of the Moodle Webservice API for v2.2
      *
      * @return external_single_structure
      */

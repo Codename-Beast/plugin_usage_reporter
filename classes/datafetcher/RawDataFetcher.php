@@ -15,9 +15,10 @@
  * - Data transformation (JSON, text)
  * - Data validation
  *
+ * 
+ * Check if User makes a degative Import to the TimeFrame! so Ban the User !
  * @package    local_pluginusagereporter
  * @copyright  2024 Bernd Schreistetter
- * @license    MIT https://opensource.org/licenses/MIT
  */
 
 namespace local_pluginusagereporter\datafetcher;
@@ -33,7 +34,7 @@ class RawDataFetcher implements DataFetchInterface
 {
     private int $limit = 100;
     private int $offset = 0;
-    private ?string $instance = null;
+    //private ?string $instance = null;
     private cache $cache;
     private ErrorHandler $errorHandler;
 
@@ -60,17 +61,18 @@ class RawDataFetcher implements DataFetchInterface
      * @return array An array of plugin usage records.
      * @throws moodle_exception If an error occurs while fetching data.
      */
-    public function fetch_data(int $timeframe): array
+    public function fetchData(int $timeframe): array
     {
-        if (!empty($this->instance)) {
-            $this->connect_to_instance($this->instance);
-        }
+        #if (!empty($this->instance)) {
+        #    $this->connect_to_instance($this->instance);
+        #}
 
         try {
             // Check if caching is enabled
             $cachingEnabled = (bool) get_config('local_pluginusagereporter', 'enable_caching');
             $cacheTTL = (int) get_config('local_pluginusagereporter', 'cache_ttl') ?: 3600;
-
+            // Set the cache key based on the timeframe
+            // This allows for different cache entries for different timeframes.
             $cacheKey = 'plugin_usage_' . $timeframe;
             if ($cachingEnabled) {
                 $cachedData = $this->cache->get($cacheKey);
@@ -210,7 +212,7 @@ class RawDataFetcher implements DataFetchInterface
      * @param array $data The data to be validated.
      * @return bool Returns true if the data is valid, otherwise false.
      */
-    public function validate_data(array $data): bool
+    public function validateData(array $data): bool
     {
         // Check if data is empty
         if (empty($data)) {
@@ -405,12 +407,15 @@ class RawDataFetcher implements DataFetchInterface
     }
 
     /**
-     *  Process multi-instance configuration and connect to selected instance.
-     *
+     * Process multi-instance configuration and connect to selected instance.
+     * Deprecated 2.2 , beacuse its just posible to connect to one instance at a time.
+     * just Workplace Supports multi-instances.
+     * This method will be removed in a future version.
+     * for now, it just logs the instance name.
      * @param string $instanceName
      * @return void
      * @throws moodle_exception
-     */
+     */ 
     private function connect_to_instance(string $instanceName): void
     {
         $instances = get_config('local_pluginusagereporter', 'instances');

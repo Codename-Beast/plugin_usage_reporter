@@ -61,7 +61,7 @@ final class raw_data_fetcher_test extends advanced_testcase
         global $DB;
 
         $fetcher = new RawDataFetcher($DB, false);
-        $result = $fetcher->validate_data([]);
+        $result = $fetcher->validateData([]);
 
         $this->assertFalse($result);
     }

@@ -44,10 +44,9 @@ class ErrorHandler
         // Log error to Moodle debugging
         debugging($message, DEBUG_DEVELOPER);
 
-        // Optional: Advanced Moodle logging or notifications
+       // Advanced Moodle logging or notifications
         $this->log_to_moodle($message, $exception);
 
-        // Optional: Extend to email notification or custom logger
         // Log error to custom logger
         logger::add('error', $exception->getMessage(), [
             'file' => $exception->getFile(),
