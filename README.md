@@ -1,7 +1,7 @@
 # Plugin Usage Reporter for Moodle
 
 **Version:** 2.1  
-**Date:**  13.05.2025
+**Date:**  13.05.2025 Updated 18.04.2025
 **Author:** Bernd Schreistetter  
 **Compatibility:** Moodle 4.5+
 
@@ -26,7 +26,6 @@ It analyzes all installed modules in courses that have been accessed within a de
 - 🔒 REST API for external systems (Grafana, etc.)
 - 🔔 Optional: Admin email notifications on errors
 - 🔥 Event-based API triggers (Live Reporting!)
-- 📊 Pro-instance monitoring (records processed per instance)
 - 📄 Full versioning and structured documentation
 
 ---
@@ -37,9 +36,6 @@ It analyzes all installed modules in courses that have been accessed within a de
 |Plugin Usage Data Fetching |✅ Completed|
 |Pagination (limit/offset)|✅ Completed|
 |Optional timeframe (enable/disable)|	✅ Completed|
-|Multi-instance processing	|✅ Completed|
-|Multi-instance with DB connection|	✅ Completed|
-|Pro-Instance data count logging|	✅ Completed|
 |Retry mechanism with delay (configurable)|	✅ Completed|
 |Central ErrorHandler	|✅ Completed|
 |Moodle Logging API	|✅ Completed|
@@ -78,7 +74,6 @@ Testklasse / Bereich	Status	Anmerkung
 - ✅ REST API with authentication and rate limiting
 - ✅ Event-based trigger for real-time reporting
 - ✅ Retry mechanism (attempts & delay configurable)
-- ✅ Pro-Instance logging of processed records
 
 ### Versioning format:
 Every PHP file now includes versioning in the header following this schema:
