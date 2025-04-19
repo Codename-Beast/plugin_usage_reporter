@@ -9,94 +9,56 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-// Plugin und Aufgabenname
+// Core
 $string['pluginname'] = 'Plugin Usage Reporter';
-$string['taskname'] = 'Geplante Aufgabe: Plugin-Nutzungsbericht erzeugen';
+$string['taskname'] = 'Generate Usage Report Task';
 
-// Einstellungen
-$string['pluginsettings'] = 'Plugin-Einstellungen';
-$string['emailsetting'] = 'E-Mail-Adresse';
-$string['emailsetting_desc'] = 'E-Mail-Adresse, an die der Nutzungsbericht gesendet wird';
-$string['timeframesetting'] = 'Zeitraum (Tage)';
-$string['timeframesetting_desc'] = 'Anzahl der Tage in der Vergangenheit, für die Nutzungsdaten gesammelt werden sollen';
-$string['frequencysetting'] = 'Berichtshäufigkeit';
-$string['frequencysetting_desc'] = 'Wie häufig der Nutzungsbericht generiert werden soll';
-$string['configdaterange'] = 'Datumsbereich für Bericht';
-$string['configdaterange_desc'] = 'Zeitraum auswählen: 3, 6 oder 12 Monate';
-$string['reporttimeframe'] = 'Berichtszeitraum';
-$string['reporttimeframe_desc'] = 'Anzahl der Tage für den Bericht (zwischen 1 und 365)';
-$string['usematerializedview'] = 'Materialisierte Ansicht verwenden';
-$string['usematerializedview_desc'] = 'Aktiviert die Verwendung einer materialisierten Ansicht für bessere Leistung';
-$string['emailformat'] = 'Berichtsformat für E-Mail';
-$string['emailformat_desc'] = 'Wähle das Format für den E-Mail-Bericht (HTML oder Text)';
+// General Settings
+$string['generalsettings'] = 'Allgemeine Einstellungen';
+$string['timeframe'] = 'Berichtszeitraum (Tage)';
+$string['timeframe_desc'] = 'Anzahl der Tage, die im Bericht berücksichtigt werden sollen.';
+$string['itemsperpage'] = 'Einträge pro Seite';
+$string['itemsperpage_desc'] = 'Anzahl der Berichtseinträge, die pro Seite im Dashboard angezeigt werden.';
+$string['includehidden'] = 'Versteckte Kurse einbeziehen';
+$string['includehidden_desc'] = 'Versteckte Kurse in die Nutzungsstatistiken einbeziehen.';
+$string['enabledebug'] = 'Debug-Modus aktivieren';
+$string['enabledebug_desc'] = 'Detaillierte Protokollierung und Entwicklermeldungen aktivieren (nur für Entwicklungsumgebungen empfohlen).';
 
-$string['enable_external_api'] = 'Externe API aktivieren';
-$string['enable_external_api_desc'] = 'Wenn aktiviert, werden die Plugin-Nutzungsdaten an ein externes System gesendet.';
-$string['external_api_url'] = 'Externe API-Endpunkt URL';
-$string['external_api_key'] = 'Externer API-Schlüssel';
-$string['enable_scheduled_task'] = 'Geplante Aufgabe aktivieren';
-$string['retry_attempts'] = 'Anzahl der Wiederholungen (bei Fehlern)';
-$string['retry_attempts_desc'] = 'Anzahl der Versuche, wenn die API-Anfrage fehlschlägt.';
-$string['retry_delay'] = 'Wartezeit zwischen Wiederholungen (Sekunden)';
-$string['retry_delay_desc'] = 'Verzögerung zwischen den Wiederholungsversuchen in Sekunden.';
-$string['enable_caching'] = 'Caching aktivieren';
-$string['enable_caching_desc'] = 'Aktiviert oder deaktiviert das Caching der Plugin-Daten.';
-$string['cache_ttl'] = 'Cache-Lebenszeit (Sekunden)';
-$string['cache_ttl_desc'] = 'Lebensdauer des Caches in Sekunden.';
-$string['enable_event_api'] = 'Event-basierte API-Auslösung aktivieren';
-$string['enable_event_api_desc'] = 'Bericht automatisch durch Moodle-Events auslösen.';
-$string['enable_notifications'] = 'E-Mail-Benachrichtigungen aktivieren';
-$string['enable_notifications_desc'] = 'Bei Fehlern eine E-Mail-Benachrichtigung an den Administrator senden.';
+// Caching
+$string['enablecaching'] = 'Caching aktivieren';
+$string['enablecaching_desc'] = 'Berichtsdaten zwischenspeichern, um die Leistung zu verbessern.';
+$string['cachettl'] = 'Cache-Lebensdauer';
+$string['cachettl_desc'] = 'Zeit in Sekunden, bis der Cache abläuft.';
 
-// Berichtszeiträume
-$string['month3'] = 'Letzte 3 Monate';
-$string['month6'] = 'Letzte 6 Monate';
-$string['month12'] = 'Letzte 12 Monate';
+// Tasks
+$string['tasksettings'] = 'Geplante Aufgaben & Wiederholungen';
+$string['enablescheduledtask'] = 'Geplante Aufgabe aktivieren';
+$string['enablescheduledtask_desc'] = 'Berichte automatisch über den Cron generieren.';
+$string['taskretries'] = 'Wiederholungsversuche bei Fehlern';
+$string['taskretries_desc'] = 'Anzahl der Wiederholungsversuche bei fehlgeschlagenen Aufgaben.';
+$string['retrydelay'] = 'Wartezeit zwischen Wiederholungen';
+$string['retrydelay_desc'] = 'Verzögerung in Sekunden zwischen Wiederholungsversuchen.';
 
-// Häufigkeitsoptionen
-$string['daily'] = 'Täglich';
-$string['weekly'] = 'Wöchentlich';
-$string['monthly'] = 'Monatlich';
+// API Settings
+$string['apisettings'] = 'API Einstellungen';
+$string['enableexternalapi'] = 'Externe API aktivieren';
+$string['enableexternalapi_desc'] = 'Integration mit externen Monitoringsystemen aktivieren.';
+$string['externalapiurl'] = 'API-Endpunkt URL';
+$string['externalapiurl_desc'] = 'Nur HTTPS-Verbindungen sind zulässig.';
 
-// Berichtsspalten
-$string['modulename'] = 'Modulname';
-$string['coursename'] = 'Kursname';
-$string['courseid'] = 'Kurs-ID';
-$string['usagecount'] = 'Nutzungsanzahl';
-$string['timestamp'] = 'Zeitstempel';
+// Status (optional)
+$string['status_starting'] = 'Berichtserstellung wird gestartet...';
+$string['status_complete'] = 'Berichtserstellung abgeschlossen';
+$string['status_failed'] = 'Berichtserstellung fehlgeschlagen';
+$string['status_retrying'] = 'Wiederhole fehlgeschlagene Aufgabe...';
 
-// Status- und Fehlermeldungen
-$string['invalidemail'] = 'Ungültige E-Mail-Adresse in den Plugin-Einstellungen. Es wird keine E-Mail gesendet.';
-$string['validemail'] = 'Gültige E-Mail-Adresse';
-$string['checkingusage'] = 'Prüfe Plugin-Nutzung in den ausgewählten Kursen';
-$string['foundusage'] = 'Gefundene Plugin-Nutzungen';
-$string['pluginusagereport'] = 'Plugin-Nutzungsbericht';
-$string['reportgenerated'] = 'Bericht generiert';
-$string['sendingreport'] = 'Bericht wird per E-Mail versendet';
-$string['emailsent'] = 'Bericht erfolgreich per E-Mail versendet';
-$string['materializedview_unsupported'] = 'Materialisierte Ansichten werden in {$a} nicht unterstützt';
-$string['materializedview_missing'] = 'Materialisierte Ansicht nicht in der Datenbank gefunden';
-$string['materializedview_error'] = 'Fehler bei der Abfrage der materialisierten Ansicht';
-$string['fallback_raw_query'] = 'Wechsle zur Rohdaten-Abfrage';
+// Output Types (optional)
+$string['reporttype_html'] = 'HTML-Bericht';
+$string['reporttype_csv'] = 'CSV-Export';
+$string['reporttype_xml'] = 'XML-Feed';
 
-// Cronjob-Meldungen
-$string['cronjobmessage'] = 'Plugin Usage Reporter Cronjob läuft';
-$string['cronjobnotfound'] = 'Geplante Aufgabe {$a} wurde nicht gefunden';
-$string['cronjobregistered'] = 'Geplante Aufgabe {$a} wurde erfolgreich registriert';
-$string['cronjobnotfoundexception'] = 'Die geplante Aufgabe konnte nicht registriert werden';
-$string['adminusernotfound'] = 'Admin-Benutzer konnte nicht gefunden werden';
-
-// Dashboard
-$string['dashboardtitle'] = 'Plugin Usage Dashboard';
-$string['action_details'] = 'Details anzeigen';
-$string['report_entries'] = 'Einträge';
-$string['id'] = 'ID';
-$string['date'] = 'Datum';
-$string['timeframe'] = 'Zeitrahmen';
-$string['entries'] = 'Einträge';
-$string['actions'] = 'Aktionen';
-$string['manualtrigger'] = 'Bericht manuell erzeugen und senden';
-$string['manualtrigger_desc'] = 'Hier klicken, um den Plugin-Bericht manuell zu erzeugen und zu senden.';
-$string['reporthistory'] = 'Berichtshistorie';
-$string['nologentries'] = 'Keine Protokolleinträge gefunden.';
+// Fehler-/Validierungsmeldungen
+$string['generation_error'] = 'Die Berichtserstellung ist fehlgeschlagen. Bitte kontaktiere den Administrator.';
+$string['https_required'] = 'Nur sichere HTTPS-Endpunkte sind erlaubt.';
+$string['error_invalidtimeframe'] = 'Ungültiger Zeitraum: Der Wert muss größer als 0 sein.';
 
