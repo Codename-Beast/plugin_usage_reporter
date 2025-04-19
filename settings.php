@@ -1,150 +1,209 @@
 <?php
-/**
- * v1.1.1-10 A 2025-04-13 [API Config + Task optional control + Existing settings merged]
- *
- * Plugin settings for the Plugin Usage Reporter.
- *
- * @package    local_pluginusagereporter
- * @copyright  2024 Bernd Schreistetter
- * @license    MIT https://opensource.org/licenses/MIT
- */
+// This file is part of the Plugin Usage Reporter - settings configuration
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
 
 defined('MOODLE_INTERNAL') || die();
 
 if ($hassiteconfig) {
-    //[Since v1] Create main settings page
+    // Main settings page
+    // This page contains the settings for the Plugin Usage Reporter plugin.
+    // It allows the administrator to configure various options for the plugin's functionality.
     $settings = new admin_settingpage(
         'local_pluginusagereporter_settings',
         get_string('pluginname', 'local_pluginusagereporter')
     );
 
-    //[Since v1] Email recipient setting
-    $settings->add(new admin_setting_configtext(
-        'local_pluginusagereporter/email',
-        get_string('emailsetting', 'local_pluginusagereporter'),
-        get_string('emailsetting_desc', 'local_pluginusagereporter'),
-        '',
-        PARAM_EMAIL
+    // General Settings
+    // This section allows the user to configure general settings for the plugin usage reporter.
+    // General settings are essential for the plugin to function correctly and efficiently.
+    $settings->add(new admin_setting_heading(
+        'local_pluginusagereporter/general',
+        get_string('generalsettings', 'local_pluginusagereporter'),
+        ''
     ));
-
-    //[Since v1] Data collection timeframe (in days)
+    //Timeframe for report generation
+    // This setting allows the user to specify the timeframe for which the plugin usage report should be generated.
     $settings->add(new admin_setting_configtext(
         'local_pluginusagereporter/timeframe',
-        get_string('timeframesetting', 'local_pluginusagereporter'),
-        get_string('timeframesetting_desc', 'local_pluginusagereporter'),
-        365,
+        get_string('timeframe', 'local_pluginusagereporter'),
+        get_string('timeframe_desc', 'local_pluginusagereporter'),
+        90,
         PARAM_INT
     ));
-
-    //[Since v1] Include hidden courses?
+    //include hidden courses in report
+    // This setting allows the user to include hidden courses in the plugin usage report.
     $settings->add(new admin_setting_configcheckbox(
         'local_pluginusagereporter/includehidden',
         get_string('includehidden', 'local_pluginusagereporter'),
-        get_string('includehidden_desc', 'local_pluginusagereporter', '0 = exclude hidden courses, 1 = include them'),
+        get_string('includehidden_desc', 'local_pluginusagereporter'),
         0
     ));
 
-    //[Since v1] Report generation frequency
-    $frequencies = [
-        86400   => get_string('daily', 'local_pluginusagereporter'),
-        604800  => get_string('weekly', 'local_pluginusagereporter'),
-        2592000 => get_string('monthly', 'local_pluginusagereporter')
-    ];
-    $settings->add(new admin_setting_configselect(
-        'local_pluginusagereporter/frequency',
-        get_string('frequencysetting', 'local_pluginusagereporter'),
-        get_string('frequencysetting_desc', 'local_pluginusagereporter'),
-        604800, // Default: weekly
-        $frequencies
+    // Data Collection
+    // This section allows the user to configure data collection settings for the plugin usage reporter.
+    // Data collection settings are crucial for ensuring that the plugin collects the right data for reporting.
+    $settings->add(new admin_setting_heading(
+        'local_pluginusagereporter/datacollection',
+        get_string('datacollection', 'local_pluginusagereporter'),
+        ''
     ));
-
-    //[Since v1] Report data retention period
-    $settings->add(new admin_setting_configtext(
-        'local_pluginusagereporter/reporttimeframe',
-        get_string('reporttimeframe', 'local_pluginusagereporter'),
-        get_string('reporttimeframe_desc', 'local_pluginusagereporter'),
-        365,
-        PARAM_INT
-    ));
-
-
-    //[Since v1]Email report format selection
+    // logging level settings 
+    // This setting allows the user to choose the level of logging for the plugin usage reporter.
+    // Different levels of logging can help in debugging and monitoring the plugin's behavior.
     $settings->add(new admin_setting_configselect(
-        'local_pluginusagereporter/emailformat',
-        get_string('emailformat', 'local_pluginusagereporter'),
-        get_string('emailformat_desc', 'local_pluginusagereporter'),
-        'html',
+        'local_pluginusagereporter/logginglevel',
+        get_string('logginglevel', 'local_pluginusagereporter'),
+        get_string('logginglevel_desc', 'local_pluginusagereporter'),
+        'normal',
         [
-            'html' => 'HTML',
-            'text' => get_string('textformat', 'local_pluginusagereporter')
+            'minimal' => get_string('loggingminimal', 'local_pluginusagereporter'),
+            'normal' => get_string('loggingnormal', 'local_pluginusagereporter'),
+            'verbose' => get_string('loggingverbose', 'local_pluginusagereporter')
         ]
     ));
 
-    // [Since v1.1.1-10 A]: External API export toggle
-    $settings->add(new admin_setting_configcheckbox(
-        'local_pluginusagereporter/enable_external_api',
-        'Enable External API Export',
-        'If enabled, plugin usage data will be sent to an external system (e.g., Grafana, central monitoring).',
-        0
+    // Caching
+    // This section allows the user to configure caching settings for the plugin usage reporter.
+    // Caching can improve performance by storing frequently accessed data temporarily.
+    $settings->add(new admin_setting_heading(
+        'local_pluginusagereporter/caching',
+        get_string('cachingsettings', 'local_pluginusagereporter'),
+        get_string('cachingsettings_desc', 'local_pluginusagereporter')
     ));
-
-    //[Since v1.1.1-10 A]:External API URL
-    $settings->add(new admin_setting_configtext(
-        'local_pluginusagereporter/external_api_url',
-        'External API Endpoint URL',
-        'The target endpoint URL for external plugin usage reports.',
-        '',
-        PARAM_URL
-    ));
-
-    // [Since v1.1.1-10 A]: Scheduled Task enable/disable
-    $settings->add(new admin_setting_configcheckbox(
-        'local_pluginusagereporter/enable_scheduled_task',
-        'Enable Scheduled Report Task',
-        'If enabled, plugin usage reports will be generated automatically via Moodle\'s scheduled tasks.',
-        0
-    ));
-
-    //[Since v1]. Add settings to admin tree
-    $ADMIN->add('localplugins', $settings);
-
-    //[Since v1] Add dashboard link to admin navigation
-    $ADMIN->add('localplugins', new admin_externalpage(
-        'local_pluginusagereporter_dashboard',
-        get_string('dashboardtitle', 'local_pluginusagereporter'),
-        new moodle_url('/local/pluginusagereporter/dashboard.php'),
-        'local/pluginusagereporter:view'
-    ));
-
-    // [Since v1.1.1-10 E]: Enable email notifications for API / report events
-    $settings->add(new admin_setting_configcheckbox(
-        'local_pluginusagereporter/enable_notifications',
-        'Enable Email Notifications',
-        'If enabled, administrators will receive email notifications about report generation and API events.',
-        0
-    ));
-    // [Since v1.1.1-10 G]: Enable or disable caching
+    // Add a setting to enable or disable caching
+    // This setting will allow the user to toggle caching on or off.
     $settings->add(new admin_setting_configcheckbox(
         'local_pluginusagereporter/enable_caching',
-        'Enable Caching',
-        'Enable or disable data caching for plugin usage reports.',
+        get_string('enablecaching', 'local_pluginusagereporter'),
+        get_string('enablecaching_desc', 'local_pluginusagereporter'),
         1
     ));
-
-    // [Since v1.1.1-10 G]: Cache TTL configuration
+    // Add a setting for cache TTL (Time to Live)
+    // This setting will determine how long the cached data is valid before it needs to be refreshed.
     $settings->add(new admin_setting_configtext(
         'local_pluginusagereporter/cache_ttl',
-        'Cache Lifetime (seconds)',
-        'Time to live (TTL) for cached plugin usage data.',
+        get_string('cachettl', 'local_pluginusagereporter'),
+        get_string('cachettl_desc', 'local_pluginusagereporter'),
         3600,
         PARAM_INT
     ));
 
-    // [Since v1.1.1-10 I]: Enable event-based API triggering
+    // 4. Task Settings
+    $settings->add(new admin_setting_heading(
+        'local_pluginusagereporter/tasks',
+        get_string('tasksettings', 'local_pluginusagereporter'),
+        ''
+    ));
+    // Add a setting to enable or disable the scheduled task
+    // This setting will allow the user to toggle the scheduled task on or off.
     $settings->add(new admin_setting_configcheckbox(
-        'local_pluginusagereporter/enable_event_api',
-        'Enable Event-based API Trigger',
-        'If enabled, plugin usage reports will be automatically triggered by certain Moodle events.',
+        'local_pluginusagereporter/enable_scheduled_task',
+        get_string('enablescheduledtask', 'local_pluginusagereporter'),
+        get_string('enablescheduledtask_desc', 'local_pluginusagereporter'),
+        1
+    ));
+    // retry delay settings
+    // This setting allows the user to specify the delay between retry attempts for the scheduled task.
+    $settings->add(new admin_setting_configduration(
+        'local_pluginusagereporter/retry_delay',
+        get_string('retrydelay', 'local_pluginusagereporter'),
+        get_string('retrydelay_desc', 'local_pluginusagereporter'),
+        3600, // Default 1 hour
+        PARAM_INT
+    ));
+
+    // API & Integration Settings
+    // This section allows the user to configure API and integration settings for the plugin usage reporter.
+    $settings->add(new admin_setting_heading(
+        'local_pluginusagereporter/api',
+        get_string('apisettings', 'local_pluginusagereporter'),
+        get_string('apisettings_desc', 'local_pluginusagereporter')
+    ));
+    // Add a setting for the API key
+    // This setting will allow the user to specify the API key for external integrations.
+    $settings->add(new admin_setting_configcheckbox(
+        'local_pluginusagereporter/enable_external_api',
+        get_string('enableexternalapi', 'local_pluginusagereporter'),
+        get_string('enableexternalapi_desc', 'local_pluginusagereporter'),
         0
     ));
+    //external API URL settings
+    // This setting allows the user to specify the URL for the external API.
+    $settings->add(new admin_setting_configtext(
+        'local_pluginusagereporter/external_api_url',
+        get_string('externalapiurl', 'local_pluginusagereporter'),
+        get_string('externalapiurl_desc', 'local_pluginusagereporter'),
+        '',
+        PARAM_URL
+    ));
+
+    // Security
+    // This section allows the user to configure security settings for the plugin usage reporter.
+    // Security settings are crucial for protecting sensitive data and ensuring secure communication.
+    $settings->add(new admin_setting_heading(
+        'local_pluginusagereporter/security',
+        get_string('securitysettings', 'local_pluginusagereporter'),
+        get_string('securitysettings_desc', 'local_pluginusagereporter')
+    ));
+    //enforce https settings
+    // This setting allows the user to enforce HTTPS for API requests.
+    $settings->add(new admin_setting_configcheckbox(
+        'local_pluginusagereporter/enforce_https',
+        get_string('enforcehttps', 'local_pluginusagereporter'),
+        get_string('enforcehttps_desc', 'local_pluginusagereporter'),
+        1
+    ));
+    //Key Rotation settings
+    // This setting allows the user to specify the key rotation interval for API keys.
+    // Key rotation is important for maintaining security and preventing unauthorized access.
+    // The default value is set to 30 days (2592000 seconds).
+    $settings->add(new admin_setting_configduration(
+        'local_pluginusagereporter/key_rotation',
+        get_string('keyrotation', 'local_pluginusagereporter'),
+        get_string('keyrotation_desc', 'local_pluginusagereporter'),
+        2592000, // 30 days
+        PARAM_INT
+    ));
+    //enable debugging settings
+    // This setting allows the user to enable or disable debugging for the plugin usage reporter.
+    // Debugging can help in identifying issues and monitoring the plugin's behavior.
+    // The default value is set to 0 (disabled).
+
+    $settings->add(new admin_setting_configcheckbox(
+        'local_pluginusagereporter/enable_debugging',
+        get_string('enabledebug', 'local_pluginusagereporter'),
+        get_string('enabledebug_desc', 'local_pluginusagereporter'),
+        0
+    ));
+    //items per page settings
+    // This setting allows the user to specify the number of items to display per page in reports.
+    // Pagination can improve user experience by breaking down large datasets into manageable chunks.
+    // The default value is set to 10 items per page.
+    // The parameter type is set to PARAM_INT to ensure that only integer values are accepted.
+    $settings->add(new admin_setting_configtext(
+        'local_pluginusagereporter/itemsperpage',
+        get_string('itemsperpage', 'local_pluginusagereporter'),
+        get_string('itemsperpage_desc', 'local_pluginusagereporter'),
+        10,
+        PARAM_INT
+    ));
+    
+
+    // Include hidden courses in report settings
+    // This setting allows the user to include hidden courses in the plugin usage report.
+    // Hidden courses may not be relevant for all reports, so this setting provides flexibility.
+    // The default value is set to 0 (disabled).
+    // The parameter type is set to PARAM_BOOL to ensure that only boolean values (0 or 1) are accepted.
+    $settings->add(new admin_setting_configcheckbox(
+        'local_pluginusagereporter/includehidden',
+        get_string('includehidden', 'local_pluginusagereporter'),
+        get_string('includehidden_desc', 'local_pluginusagereporter'),
+        0
+    ));
+
+    // Add to admin tree
+    $ADMIN->add('localplugins', $settings);
 }

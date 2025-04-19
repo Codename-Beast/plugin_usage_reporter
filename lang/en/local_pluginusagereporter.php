@@ -89,3 +89,8 @@ $string['cache_ttl_desc'] = 'Time to live for cache entries in seconds.';
 // [Since v1.1.1-10 I]: Event trigger settings
 $string['enable_event_api'] = 'Enable Event-based API Trigger';
 $string['enable_event_api_desc'] = 'Automatically trigger reports when specific events happen in Moodle.';
+$string['generalsettings'] = 'General Settings';
+$string['cachingsettings'] = 'Caching Settings';
+$string['cachingsettings_desc'] = 'Configure caching behavior for report data';
+$string['securitysettings'] = 'Security Settings';
+$string['securitysettings_desc'] = 'Security and access control configurations';
