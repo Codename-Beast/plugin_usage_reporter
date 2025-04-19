@@ -25,7 +25,7 @@ namespace local_pluginusagereporter\datafetcher;
 defined('MOODLE_INTERNAL') || die();
 
 // Removed moodle_exception as it is not used correctly.
-use dml_exception;
+// Removed dml_exception as it is not compatible with Throwable.
 use cache;
 use local_pluginusagereporter\ErrorHandler;
 
@@ -65,15 +65,16 @@ class RawDataFetcher implements DataFetchInterface
      *
      * @param int $timeframe The number of days to look back from the current time.
      * @return array An array of plugin usage records.
-     * @throws moodle_exception If an error occurs while fetching data.
+     * @throws ErrorHandler If an error occurs while fetching data.
      */
     public function fetchData(int $timeframe): array
     {
         // Validate the timeframe parameter to ensure it's not negative.
         // Dirty version will be moved to validateData method
-        if ($timeframe < 0) {
-            $this->log_error('Unsupported timeframe: ' . $timeframe);
-            $this->errorHandler->handle(new \Exception('Unsupported timeframe: ' . $timeframe));
+        if ($timeframe <= 0) {
+            $this->log_error(get_string('error_invalidtimeframe', 'local_pluginusagereporter') . ': ' . $timeframe);
+            $this->errorHandler->handle(new \Exception(get_string('error_invalidtimeframe', 'local_pluginusagereporter')));
+            return []; // falls Funktion Daten zurückliefert
         }
         try {
             // Check if caching is enabled
@@ -126,7 +127,7 @@ class RawDataFetcher implements DataFetchInterface
      * @param int $ttl Time-to-live for cached data in seconds.
      * @return void
      */
-    public function cache_data(string $key, array $data, int $ttl): void
+    public function cacheData(string $key, array $data, int $ttl): void
     {
         $this->cache->set($key, $data, $ttl);
         $this->log_debug("Data cached", ['key' => $key, 'ttl' => $ttl]);
@@ -405,38 +406,5 @@ class RawDataFetcher implements DataFetchInterface
     private function log_error(string $message, array $data = []): void
     {
         debugging('ERROR: ' . $message . ' | ' . json_encode($data), DEBUG_DEVELOPER);
-    }
-
-    /**
-     * Process multi-instance configuration and connect to selected instance.
-     * Deprecated 2.2 , beacuse its just posible to connect to one instance at a time.
-     * just Workplace Supports multi-instances.
-     * This method will be removed in a future version.
-     * for now, it just logs the instance name.
-     * @param string $instanceName
-     * @return void
-     * @throws moodle_exception
-     */ 
-    private function connect_to_instance(string $instanceName): void
-    {
-        $instances = get_config('local_pluginusagereporter', 'instances');
-
-        if (empty($instances)) {
-            throw new \moodle_exception('No instances configured.');
-        }
-
-        $instancesConfig = json_decode($instances, true);
-
-        if (!isset($instancesConfig[$instanceName])) {
-            throw new \moodle_exception('Instance "' . $instanceName . '" not found in configuration.');
-        }
-
-        $instance = $instancesConfig[$instanceName];
-
-        // Example of applying DB settings (mocked, as Moodle DB drivers do not switch connections dynamically)
-        debugging('Multi-instance selected: ' . $instanceName, DEBUG_DEVELOPER);
-
-        // Note: Full dynamic DB switching requires external DB connection handling or Moodle multi-tenancy setup.
-        // Here we prepare configuration parsing and output for future extension.
     }
 }
