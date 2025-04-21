@@ -4,11 +4,11 @@
  *
  * @package    Eledia local_pluginusagereporter Plugin
  * @author     Bernd Schreistetter
- * @version    v2.1.0
+ * @version    v2.1.1
  *
  * -------------------------------------------------------------------------------------------------
  * Recent Changes (v1.2.1 – 2025-04-21) [Cross-DB Fixes + Runtime Patch]
- * v1.2.1 – 2025‑04‑21 [Cross‑DB Fixes + Runtime Patch]
+ * ++ v1.2.1 – 2025‑04‑21 [Cross‑DB Fixes + Runtime Patch]
  * + Improved input validation for timeframe parameter: accepts only values in 1..3650 days (10 year max)
  * + Enforced type safety for critical parameters ($timeframe, $limit, $offset) to prevent query issues
  * + Extended support for output formats in transformData() and robust error handling on invalid formats
