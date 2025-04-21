@@ -77,9 +77,12 @@ class RawDataFetcher implements DataFetchInterface
     /**
      * [Since v1.1.1-10 G] Fetches raw plugin usage data from the database with optional caching.
      *
+     * This function looks back in the database the specified number of days and returns an array of plugin
+     * usage records. The records are sorted by the timestamp when the plugin was last used.
+     *
      * @param int $timeframe The number of days to look back from the current time.
      * @return array|string An array of plugin usage records.
-     * @throws moodle_exception Exception If the timeframe is invalid or if a database error occurs.
+     * @throws moodle_exception If the timeframe is invalid or if a database error occurs.
      * @throws dml_exception If a database error occurs.
      */
     public function fetchData(int $timeframe): array|string
@@ -94,6 +97,8 @@ class RawDataFetcher implements DataFetchInterface
         $this->limit = (int)$this->limit;
         $this->offset = (int)$this->offset;
         // --- Cache handling ----//
+
+        // $cachekey needs to be sanitized before $lastcachekey is set.
         $cachekey = preg_replace('/[^a-zA-Z0-9_]/', '', $cachekey);
         $this->lastcachekey = $cachekey = "plugin_usage_{$timeframe}_{$this->limit}_{$this->offset}";
         $cachingenabled = (bool) get_config('local_pluginusagereporter', 'enable_caching');
@@ -121,8 +126,7 @@ class RawDataFetcher implements DataFetchInterface
                 $e->getMessage()
             );
         }
-
-        // ---  Post‑processing ---- //
+        // --- Post-processing: Log some debug info, add caching --- //
         if (empty($records)) {
             $this->log_debug("No Data has been found", ['records' => $records]);
             return 'nodata';
