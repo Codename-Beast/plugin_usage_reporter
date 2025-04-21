@@ -1,31 +1,28 @@
 <?php
 /**
- * v1.1.1-10 A 2025-04-13 [Full Interface Compliance + Features]
+ * v1.2.1 – 2025‑04‑21 [Cross‑DB Fixes + Runtime Patch]
  *
- * RawDataFetcher class. Fetches raw data without using materialized views.
+ * RawDataFetcher – fetches raw plugin‑usage data directly from core tables.
  *
- * Features:
- * - Cross-database compatible SQL queries
- * - Configurable report parameters
- * - Pagination support
- * - Error handling with custom ErrorHandler class
- * - Moodle Logging API for debugging
- * - Caching with Moodle Cache API
- * - Data transformation (JSON, text)
- * - Data validation
+ * Key fixes since v1.1.1‑10:
+ * - Added missing moodle_exception & dml_exception imports
+ * - Escaped LIKE wildcards with sql_like_escape() + case‑insensitive search
+ * - Removed unused INTERVAL & LIMIT/OFFSET placeholders (paging via DML helper)
+ * - Corrected visibility logic (includehidden flag)
+ * - Unified $errorHandler property name
+ * - Eliminated unused query parameters
+ * - Single DB handle ($this->db) throughout
  *
- * 
- * Check if User makes a degative Import to the TimeFrame! so Ban the User !
  * @package    local_pluginusagereporter
- * @copyright  2024 Bernd Schreistetter
+ * @author     Bernd Schreistetter
+ * 
  */
 
 namespace local_pluginusagereporter\datafetcher;
 
 defined('MOODLE_INTERNAL') || die();
-
-// Removed moodle_exception as it is not used correctly.
-// Removed dml_exception as it is not compatible with Throwable.
+use moodle_exception;           
+use dml_exception;
 use cache;
 use local_pluginusagereporter\ErrorHandler;
 
@@ -33,9 +30,10 @@ class RawDataFetcher implements DataFetchInterface
 {
     private int $limit = 100;
     private int $offset = 0;
-    //private ?string $instance = null;
     private cache $cache;
     private ErrorHandler $errorHandler;
+    /** remembers the key used in the most recent fetchData() call */
+    private ?string $lastcachekey = null;   
 
     /**
      * Constructor.
@@ -64,21 +62,20 @@ class RawDataFetcher implements DataFetchInterface
      * [Since v1.1.1-10 G] Fetches raw plugin usage data from the database with optional caching.
      *
      * @param int $timeframe The number of days to look back from the current time.
-     * @return array An array of plugin usage records.
-     * @throws ErrorHandler If an error occurs while fetching data.
+     * @return array|string An array of plugin usage records.
+     * @throws moodle_exception Exception If the timeframe is invalid or if a database error occurs.
+     * @throws dml_exception If a database error occurs.
      */
     public function fetchData(int $timeframe): array|string
     {
         // ---  Validate input --//
         if ($timeframe <= 0) {
-            $this->errorhandler->handle(
-                new \Exception(get_string('error_invalidtimeframe', 'local_pluginusagereporter'))
-            );
-            return 'error_invalidtimeframe';
+             throw new moodle_exception('error_invalidtimeframe', 'local_pluginusagereporter','', null, $timeframe);
         }
+        
 
         // --- Cache handling ----//
-        $cachekey       = "plugin_usage_{$timeframe}_{$this->limit}_{$this->offset}";
+        $this->lastcachekey = $cachekey = "plugin_usage_{$timeframe}_{$this->limit}_{$this->offset}";
         $cachingenabled = (bool) get_config('local_pluginusagereporter', 'enable_caching');
         $cachettl       = (int) get_config('local_pluginusagereporter', 'cache_ttl') ?: 3600;
 
@@ -88,7 +85,7 @@ class RawDataFetcher implements DataFetchInterface
 
         // --- Build query -----//
         $params = $this->build_query_params($timeframe);
-        $sql    = $this->build_sql_query($params);
+        $sql    = $this->build_sql_query();
 
         // --- Execute query -----//
         try {
@@ -107,6 +104,7 @@ class RawDataFetcher implements DataFetchInterface
 
         // ---  Post‑processing ---- //
         if (empty($records)) {
+            $this->log_debug("No Data has been found", ['records' => $records]);
             return 'nodata';
         }
 
@@ -132,39 +130,6 @@ class RawDataFetcher implements DataFetchInterface
         $this->log_debug("Data cached", ['key' => $key, 'ttl' => $ttl]);
     }
 
-    /**
-     * Filters the cached plugin usage data based on specified criteria.
-     *
-     * The method retrieves plugin usage data from the cache and applies the given
-     * criteria to filter the data. Each item in the data must match all provided
-     * criteria to be included in the result.
-     *
-     * @param array $criteria Associative array of filter criteria, where keys are
-     *                        the field names and values are the expected values
-     *                        for those fields.
-     * @return array Returns an array of data items that meet the filtering criteria.
-     *               If no data is found in the cache or no items match the criteria,
-     *               an empty array is returned.
-     */
-
-    public function filterData(array $criteria): array
-    {
-        $data = $this->cache->get('plugin_usage') ?: [];
-
-        if (empty($data)) {
-            $this->log_debug('No data found in cache for filtering');
-            return [];
-        }
-
-        return array_filter($data, function ($item) use ($criteria) {
-            foreach ($criteria as $field => $value) {
-                if (!isset($item->$field) || $item->$field != $value) {
-                    return false;
-                }
-            }
-            return true;
-        });
-    }
     /**
     * [Since v1.1.1-10 C] Transforms the given data into the specified format.
      *
@@ -212,44 +177,61 @@ class RawDataFetcher implements DataFetchInterface
                 return $xml->asXML();
 
             default:
-                $this->errorHandler->handle(new \Exception('Unsupported format: ' . $format));
-                return null;
+                // Handle unsupported format
+                $this->log_debug('Unsupported format requested', ['format' => $format]);
+                throw new moodle_exception('error_invalidformat',  'local_pluginusagereporter', '', null, $format);
+
         }
     }
+   
     /**
-     * Validates the given data against the required fields.
+     * Filters the cached plugin usage data based on specified criteria.
      *
-     * Validation is currently done by checking if the following fields are present in each record:
-     * - modulename
-     * - coursename
-     * - usagecount
+     * The method retrieves plugin usage data from the cache and applies the given
+     * criteria to filter the data. Each item in the data must match all provided
+     * criteria to be included in the result.
      *
-     * @param array $data The data to be validated.
-     * @return bool Returns true if the data is valid, otherwise false.
+     * @param array $criteria Associative array of filter criteria, where keys are
+     *                        the field names and values are the expected values
+     *                        for those fields.
+     * @return array Returns an array of data items that meet the filtering criteria.
+     *               If no data is found in the cache or no items match the criteria,
+     *               an empty array is returned.
      */
-    public function validateData(array $data): bool
-    {
-        // Check if data is empty
-        if (empty($data)) {
-            $this->log_debug('Validation failed: data is empty');
-            return false;
-        }
-        // Check if data is an array of objects
-        if (!is_array($data) || !isset($data[0]) || !is_object($data[0])) {
-            $this->log_debug('Validation failed: data is not an array of objects', $data);
-            return false;
-        }
-        // Check if each record has the required fields
-        // This is a simple validation. You can extend it as per your requirements.
-        foreach ($data as $record) {
-            if (!isset($record->modulename, $record->coursename, $record->usagecount)) {
-                $this->log_debug('Validation failed: missing required fields', (array)$record);
-                return false;
-            }
+    public function filterData(array $criteria = []): array {
+        //  Determine the most recent cache‑key that fetchData() used.
+        //  Fallback: legacy static key, so older caches remain nutzbar.
+        $cachekey = $this->lastcachekey
+            ?? "plugin_usage_{$this->limit}_{$this->offset}";
+
+        $data = $this->cache->get($cachekey) ?: [];
+        if (empty($data) || empty($criteria)) {
+            // nothing cached or no filter requested → return as is / empty.
+            $this->log_debug('filterData(): no cached data or no criteria', [
+                'key' => $cachekey,
+                'criteria' => $criteria,
+            ]);
+            return $data;
         }
 
-        $this->log_debug('Data validation passed');
-        return true;
+        // Apply AND‑filter: every criterion must match.
+        $result = array_values(array_filter($data, function ($row) use ($criteria) {
+            foreach ($criteria as $field => $expected) {
+                if (!property_exists($row, $field) || $row->$field != $expected) {
+                    return false;
+                }
+            }
+            return true;
+        }));
+
+        $this->log_debug('filterData(): filter complete', [
+            'key'       => $cachekey,
+            'criteria'  => $criteria,
+            'hits'      => count($result),
+            'total'     => count($data),
+        ]);
+
+        return $result;
     }
 
     /**
@@ -271,82 +253,109 @@ class RawDataFetcher implements DataFetchInterface
         // This allows for a fluent interface, enabling method chaining.
         return $this;
     }
-
-    /** --------------------
-     * Internal Helpers
-     * -------------------*/
-
     /**
-     * Builds the query parameters for the raw data query based on the given parameters.
+     * Builds an array of parameters for the SQL query to retrieve the raw data for the report.
+     *
+     * The returned array contains the following parameters:
+     * - starttime: The timestamp of the start of the given timeframe.
+     * - endtime: The timestamp of the end of the given timeframe.
+     * - includehidden: A flag indicating whether to include hidden courses in the report.
+     * - viewcourse: A SQL pattern to match the 'core_course_view_course' function in the logs.
+     * - mobilecontent: A SQL pattern to match the 'tool_mobile_get_content' function in the logs.
      *
      * @param int $timeframe The number of days to look back from the current time.
-     * @return array Returns an associative array of query parameters.
+     *
+     * @return array An array of parameters to be used in the SQL query.
      */
-    private function build_query_params(int $timeframe): array
-    {
+    private function build_query_params(int $timeframe): array {
+        $starttime = time() - ($timeframe * DAYSECS);
         return [
-            'starttime' => ($timeframe > 0) ? time() - ($timeframe * 86400) : 0,
-            'endtime' => time(),
+            'starttime'     => $starttime,
+            'endtime'       => time(),
             'includehidden' => (int) get_config('local_pluginusagereporter', 'includehidden'),
-            'viewcourse' => '%"function":"core_course_view_course"%',
-            'mobilecontent' => '%"function":"tool_mobile_get_content"%',
-            'timelimit_enabled' => ($timeframe > 0) ? 1 : 0,
-            'timelimit_days' => $timeframe,
-            'limit' => $this->limit,
-            'offset' => $this->offset,
+            'viewcourse'    => '%' . $this->db->sql_like_escape('"function":"core_course_view_course"') . '%',
+            'mobilecontent' => '%' . $this->db->sql_like_escape('"function":"tool_mobile_get_content"') . '%',// cosmetic
         ];
     }
 
     /**
-     * Builds the SQL query for fetching raw plugin usage data.
+     * Builds the SQL query for retrieving the raw data for the report.
      *
-     * The query uses the following tables:
-     * - {course_modules} (cm)
-     * - {modules} (m)
-     * - {course} (c)
-     * - {logstore_standard_log} (l)
-     * - user_data (ud)
+     * The query retrieves the following data for each course and module:
+     * - modulename
+     * - coursename
+     * - usagecount: The number of times the module has been used in the course.
+     * - lastused: The timestamp of the most recent use of the module in the course.
+     * - user_count: The number of users enrolled in the course.
+     * - roles: The roles of the users enrolled in the course.
      *
-     * The query filters out hidden courses and modules with an add time before the specified start time.
-     * The query groups the results by course ID, module ID, user count, and roles.
-     * The query orders the results by usage count in descending order.
-     * The query limits the number of records to the specified limit and offset.
+     * The query filters out courses that are not visible or have not been used
+     * in the given timeframe. It also filters out modules that are not of type
+     * 'course' or have not been used in the given timeframe.
      *
-     * @param array $params An associative array of query parameters.
-     * @return string The SQL query string.
+     * The query uses a common table expression (CTE) to retrieve the per-course
+     * user summary. The CTE is then joined with the course and module tables to
+     * retrieve the module usage data.
+     *
+     * @return string The SQL query as a string.
      */
-    private function build_sql_query(array $params): string
-    {
-        // Keeps your existing helper fragment.
-        $baseSql = $this->get_base_sql_fragment($params);
+    private function build_sql_query(): string {
+        $likeview   = $this->db->sql_like('l.other', ':viewcourse', false);
+        $likemobile = $this->db->sql_like('l.other', ':mobilecontent', false);
 
-        // FIX: safe, case‑insensitive LIKE snippets created by the helper.
-        $likeview   = $this->db->sql_like('l.other', ':viewcourse', false);   // FIX
-        $likemobile = $this->db->sql_like('l.other', ':mobilecontent', false); // FIX
+        return $this->get_base_sql_fragment() . "
+            SELECT m.name AS modulename,
+                   c.fullname AS coursename,
+                   COUNT(cm.id) AS usagecount,
+                   MAX(l.timecreated) AS lastused,
+                   ud.user_count,
+                   ud.roles
+              FROM {course_modules} cm
+              JOIN {modules} m ON m.id = cm.module
+              JOIN {course}  c ON c.id = cm.course
+         LEFT JOIN {logstore_standard_log} l
+                    ON l.courseid = c.id
+                   AND l.timecreated BETWEEN :starttime AND :endtime
+                   AND ({$likeview} OR {$likemobile})
+         LEFT JOIN user_data ud ON ud.courseid = c.id
+             WHERE (:includehidden = 1 OR c.visible = 1)
+               AND cm.added >= :starttime
+          GROUP BY c.id, m.id, ud.user_count, ud.roles
+          ORDER BY usagecount DESC";
+    }
 
-        return $baseSql . "
-            SELECT
-                m.name        AS modulename,
-                c.fullname    AS coursename,
-                COUNT(cm.id)  AS usagecount,
-                MAX(l.timecreated) AS lastused,
-                ud.user_count,
-                ud.roles
-            FROM {course_modules} cm
-            JOIN {modules} m ON cm.module = m.id
-            JOIN {course}  c ON cm.course = c.id
-        LEFT JOIN {logstore_standard_log} l
-            ON l.courseid = c.id
-            AND l.timecreated BETWEEN :starttime AND :endtime
-            AND ({$likeview} OR {$likemobile}) 
-        LEFT JOIN user_data ud ON ud.courseid = c.id
-        /* Visibility: only visible courses, unless includehidden = 1 */
-            WHERE (:includehidden = 1 OR c.visible = 1)
-            AND cm.added >= :starttime
-            GROUP BY c.id, m.id, ud.user_count, ud.roles
-            ORDER BY usagecount DESC
+ 
+    /**
+     * Returns a SQL query fragment for a common table expression (CTE) that
+     * retrieves a summary of users enrolled in each course, including the
+     * number of users and their roles.
+     *
+     * The CTE filters out log entries that are not of type 'view' or 'mobile' or
+     * that do not have a timestamp within the given timeframe.
+     *
+     * The CTE joins the log table with the user, role assignment, and role
+     * tables to retrieve the desired user data.
+     *
+     * @return string The SQL query fragment as a string.
+     */
+    private function get_base_sql_fragment(): string {
+        $likeview   = $this->db->sql_like('l.other', ':viewcourse', false);
+        $likemobile = $this->db->sql_like('l.other', ':mobilecontent', false);
+
+        return "WITH user_data AS (
+            SELECT l.courseid,
+                   COUNT(DISTINCT u.id) AS user_count,
+                   " . $this->get_role_concat_sql() . " AS roles
+              FROM {logstore_standard_log} l
+              JOIN {user} u ON u.id = l.userid
+              JOIN {role_assignments} ra ON ra.userid = u.id
+              JOIN {role} r ON r.id = ra.roleid
+             WHERE l.origin IN ('ws','mobile')
+               AND ({$likeview} OR {$likemobile})
+               AND l.timecreated >= :starttime
+             GROUP BY l.courseid
+        )
         ";
-        
     }
 
     /**
@@ -360,41 +369,6 @@ class RawDataFetcher implements DataFetchInterface
     }
 
     /**
-     * Returns an SQL expression for a Common Table Expression (CTE) that provides user data for each course.
-     *
-     * The CTE selects the course ID, user count, and a concatenated string of distinct role shortnames
-     * for each course. It filters out log records that are not of type 'core_course_view_course' or
-     * 'tool_mobile_get_content', and that have a timestamp before the specified start time.
-     *
-     * @param array $params An associative array of query parameters.
-     * @return string The SQL expression as a string.
-     */
-    private function get_base_sql_fragment(array $params): string
-    {
-        global $DB;
-
-        // Safe, case‑insensitive LIKE fragments.   
-        $likeview   = $DB->sql_like('l.other', ':viewcourse', false);
-        $likemobile = $DB->sql_like('l.other', ':mobilecontent', false);
-
-        return "
-            WITH user_data AS (
-                SELECT l.courseid,
-                    COUNT(DISTINCT u.id)                AS user_count,
-                    " . $this->get_role_concat_sql() . " AS roles
-                FROM {logstore_standard_log} l
-                JOIN {user}             u  ON u.id = l.userid
-                JOIN {role_assignments} ra ON ra.userid = u.id
-                JOIN {role}             r  ON r.id = ra.roleid
-                WHERE l.origin IN ('ws','mobile') -- ws, mobile only
-                AND ({$likeview} OR {$likemobile})
-                AND l.timecreated >= :starttime  --  (interval‑free)
-                GROUP BY l.courseid
-            )
-        ";
-    }
-
-    /**
      * Logs a debug message with optional data using the Moodle debugging API.
      *
      * @param string $message The debug message to log.
@@ -403,16 +377,5 @@ class RawDataFetcher implements DataFetchInterface
     private function log_debug(string $message, array $data = []): void
     {
         debugging($message . ' | ' . json_encode($data), DEBUG_DEVELOPER);
-    }
-
-    /**
-     * Logs an error message with optional data using the Moodle debugging API.
-     *
-     * @param string $message The error message to log.
-     * @param array $data Optional additional data to log.
-     */
-    private function log_error(string $message, array $data = []): void
-    {
-        debugging('ERROR: ' . $message . ' | ' . json_encode($data), DEBUG_DEVELOPER);
     }
 }

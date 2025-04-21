@@ -33,7 +33,6 @@ interface DataFetchInterface
 {
     /**
      * Fetches plugin usage data.
-     * @ToDo implement check to make sure User can't use negative Timeframe Input
      * @param int $timeframe The number of days to look back.
      * @return array Fetched plugin usage data.
      */
@@ -72,7 +71,7 @@ interface DataFetchInterface
      * @param array $data The data to validate.
      * @return bool Returns true if data is valid, otherwise false.
      */
-    public function validateData(array $data): bool;
+    //public function validateData(array $data): bool;
     /**
      * Sets pagination parameters.
      *
