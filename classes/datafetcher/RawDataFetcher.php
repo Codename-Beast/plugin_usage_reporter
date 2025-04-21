@@ -68,13 +68,17 @@ class RawDataFetcher implements DataFetchInterface
      */
     public function fetchData(int $timeframe): array|string
     {
-        // ---  Validate input --//
-        if ($timeframe <= 0) {
-             throw new moodle_exception('error_invalidtimeframe', 'local_pluginusagereporter','', null, $timeframe);
+        // ---  Validate input ---//
+        if ($timeframe <= 0 || $timeframe > 3650) {// 10 years max
+            // Invalid timeframe, throw an exception
+            throw new moodle_exception('error_invalidtimeframe', 'local_pluginusagereporter');
         }
-        
-
+        // Explicit type conversion
+        $timeframe = (int)$timeframe;
+        $this->limit = (int)$this->limit;
+        $this->offset = (int)$this->offset;
         // --- Cache handling ----//
+        $cachekey = preg_replace('/[^a-zA-Z0-9_]/', '', $cachekey);
         $this->lastcachekey = $cachekey = "plugin_usage_{$timeframe}_{$this->limit}_{$this->offset}";
         $cachingenabled = (bool) get_config('local_pluginusagereporter', 'enable_caching');
         $cachettl       = (int) get_config('local_pluginusagereporter', 'cache_ttl') ?: 3600;
@@ -140,6 +144,9 @@ class RawDataFetcher implements DataFetchInterface
     */
     public function transformData(array $data, string $format)
     {
+        if (!in_array(strtolower($format), ['json', 'txt', 'csv', 'xml'])) {
+            	throw new moodle_exception('error_invalidformat', 'local_pluginusagereporter');
+        }
         switch (strtolower($format)) {
             case 'json':
                 return json_encode($data, JSON_PRETTY_PRINT);
@@ -358,14 +365,20 @@ class RawDataFetcher implements DataFetchInterface
         ";
     }
 
-    /**
-     * Returns an SQL expression for concatenating distinct role shortnames in a group.
+   /**
+     * Returns an SQL expression for concatenating distinct role shortnames in a group,
+     * truncated on SQL level to max. 255 characters for compatibility and performance.
      *
      * @return string The SQL expression as a string.
      */
     private function get_role_concat_sql(): string
     {
-        return $this->db->sql_group_concat('DISTINCT r.shortname', ', ');
+        // SQL truncation, Moodle-DB abstraction: use LEFT() (MySQL), SUBSTR() (Postgres, Oracle), etc.
+        // Moodle's $DB->sql_substr() gives you the right substring statement, platform-independently.
+        // $this->db->sql_group_concat(expr, sep, orderby = null)
+        $concat_expr = $this->db->sql_group_concat('DISTINCT r.shortname', ', ');
+        // Wrap in SQL SUBSTR to truncaten (hier: 255 Zeichen)
+        return $this->db->sql_substr("($concat_expr)", 1, 255);
     }
 
     /**
