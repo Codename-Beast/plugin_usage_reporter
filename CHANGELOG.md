@@ -1,14 +1,14 @@
 # Changelog
 
 ## Planned for v2.2
-- [ ] API rate limiting and usage counters
+- [x] API rate limiting and usage counters
+- [x] Grafana dashboard example JSON & documentation
+- [x] Extended course-based statistics via Webservice
 - [ ] Optional exponential backoff logic for retries
 - [ ] Webservice token whitelist & optional API key mode
-- [x] Grafana dashboard example JSON & documentation
 - [ ] Optional output formats: CSV endpoint for Webservice
 - [ ] Automated report emailing (configurable via settings)
 - [ ] Code coverage metrics for all core classes
-- [ ] Extended course-based statistics via Webservice
 
 All notable changes to the Plugin Usage Reporter plugin are documented here.
 
