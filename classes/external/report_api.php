@@ -68,7 +68,7 @@ class report_api extends external_api
         $fetcher = new RawDataFetcher($DB);
         $fetcher->setPagination(1000, 0);
 
-        $data = $fetcher->fetch_data($timeframe);
+        $data = $fetcher->fetchData($timeframe);
 
         logger::add('success', 'API report successfully delivered.', [
             'method' => 'REST API'

@@ -67,56 +67,55 @@ class RawDataFetcher implements DataFetchInterface
      * @return array An array of plugin usage records.
      * @throws ErrorHandler If an error occurs while fetching data.
      */
-    public function fetchData(int $timeframe): array
+    public function fetchData(int $timeframe): array|string
     {
-        // Validate the timeframe parameter to ensure it's not negative.
-        // Dirty version will be moved to validateData method
+        // ---  Validate input --//
         if ($timeframe <= 0) {
-            $this->log_error(get_string('error_invalidtimeframe', 'local_pluginusagereporter') . ': ' . $timeframe);
-            $this->errorHandler->handle(new \Exception(get_string('error_invalidtimeframe', 'local_pluginusagereporter')));
-            return []; // falls Funktion Daten zurückliefert
+            $this->errorhandler->handle(
+                new \Exception(get_string('error_invalidtimeframe', 'local_pluginusagereporter'))
+            );
+            return 'error_invalidtimeframe';
         }
-        try {
-            // Check if caching is enabled
-            $cachingEnabled = (bool) get_config('local_pluginusagereporter', 'enable_caching');
-            $cacheTTL = (int) get_config('local_pluginusagereporter', 'cache_ttl') ?: 3600;
-            // Set the cache key based on the timeframe
-            // This allows for different cache entries for different timeframes.
-            $cacheKey = 'plugin_usage_' . $timeframe;
-            if ($cachingEnabled) {
-                $cachedData = $this->cache->get($cacheKey);
-                if ($cachedData !== false) {
-                    $this->log_debug('Cache hit for key: ' . $cacheKey);
-                    return $cachedData;
-                }
-                $this->log_debug('Cache miss for key: ' . $cacheKey);
-            }
-            // Build the SQL query and parameters
-            // This method constructs the SQL query based on the provided timeframe and other parameters.
-            $params = $this->build_query_params($timeframe);
-            // Execute the SQL query to fetch raw plugin usage data
-            // The query is built using the build_sql_query method, which takes the parameters as input.
-            $sql = $this->build_sql_query($params);
-            // Log the SQL query and parameters for debugging purposes
-            // This is useful for tracking the execution of SQL queries and their parameters.
-            $this->log_debug('Executing SQL query', ['sql' => $sql, 'params' => $params]);
-            // Execute the SQL query and retrieve the raw plugin usage data
-            $result = $this->db->get_records_sql($sql, $params) ?: [];
-            // Log the number of records fetched
-            $this->log_debug('Fetched ' . count($result) . ' records');
-            // If caching is enabled, store the result in the cache with the specified TTL
-            // This allows for faster retrieval of data in subsequent requests.
-            if ($cachingEnabled) {
-                $this->cache->set($cacheKey, $result, $cacheTTL);
-                $this->log_debug('Data cached', ['key' => $cacheKey, 'ttl' => $cacheTTL]);
-            }
 
-            return $result;
-        } catch (\Throwable $e) {
-            $this->log_error('Fetch data failed', ['error' => $e->getMessage()]);
-            $this->errorHandler->handle($e);
-            return [];
+        // --- Cache handling ----//
+        $cachekey       = "plugin_usage_{$timeframe}_{$this->limit}_{$this->offset}";
+        $cachingenabled = (bool) get_config('local_pluginusagereporter', 'enable_caching');
+        $cachettl       = (int) get_config('local_pluginusagereporter', 'cache_ttl') ?: 3600;
+
+        if ($cachingenabled && ($cached = $this->cache->get($cachekey)) !== false) {
+            return $cached ?: 'nodata';
         }
+
+        // --- Build query -----//
+        $params = $this->build_query_params($timeframe);
+        $sql    = $this->build_sql_query($params);
+
+        // --- Execute query -----//
+        try {
+            // pass limit/offset via DML helper – cross‑DB compatible
+            $records = $this->db->get_records_sql($sql, $params, $this->offset, $this->limit);
+        } catch (dml_exception $e) {
+            // Catch dml_exception and re‑throw as moodle_exception so WS & CLI handle it natively
+            throw new moodle_exception(
+                'error_db',
+                'local_pluginusagereporter',
+                '',
+                null,
+                $e->getMessage()
+            );
+        }
+
+        // ---  Post‑processing ---- //
+        if (empty($records)) {
+            return 'nodata';
+        }
+
+        $records = array_values($records);
+
+        if ($cachingenabled) {
+            $this->cache->set($cachekey, $records, $cachettl);
+        }
+        return $records;
     }
 
     /**
@@ -318,31 +317,36 @@ class RawDataFetcher implements DataFetchInterface
      */
     private function build_sql_query(array $params): string
     {
+        // Keeps your existing helper fragment.
         $baseSql = $this->get_base_sql_fragment($params);
 
+        // FIX: safe, case‑insensitive LIKE snippets created by the helper.
+        $likeview   = $this->db->sql_like('l.other', ':viewcourse', false);   // FIX
+        $likemobile = $this->db->sql_like('l.other', ':mobilecontent', false); // FIX
+
         return $baseSql . "
-            SELECT 
-                m.name AS modulename,
-                c.fullname AS coursename,
-                COUNT(cm.id) AS usagecount,
+            SELECT
+                m.name        AS modulename,
+                c.fullname    AS coursename,
+                COUNT(cm.id)  AS usagecount,
                 MAX(l.timecreated) AS lastused,
                 ud.user_count,
                 ud.roles
             FROM {course_modules} cm
             JOIN {modules} m ON cm.module = m.id
-            JOIN {course} c ON cm.course = c.id
-            LEFT JOIN {logstore_standard_log} l 
-                ON l.courseid = c.id 
-                AND l.timecreated BETWEEN :starttime AND :endtime
-                AND (l.origin = 'ws' OR l.origin = 'mobile')
-            LEFT JOIN user_data ud ON ud.courseid = c.id
-            WHERE 
-                c.visible = :includehidden
-                AND cm.added >= :starttime
+            JOIN {course}  c ON cm.course = c.id
+        LEFT JOIN {logstore_standard_log} l
+            ON l.courseid = c.id
+            AND l.timecreated BETWEEN :starttime AND :endtime
+            AND ({$likeview} OR {$likemobile}) 
+        LEFT JOIN user_data ud ON ud.courseid = c.id
+        /* Visibility: only visible courses, unless includehidden = 1 */
+            WHERE (:includehidden = 1 OR c.visible = 1)
+            AND cm.added >= :starttime
             GROUP BY c.id, m.id, ud.user_count, ud.roles
             ORDER BY usagecount DESC
-            LIMIT :limit OFFSET :offset
         ";
+        
     }
 
     /**
@@ -369,21 +373,25 @@ class RawDataFetcher implements DataFetchInterface
     {
         global $DB;
 
-        return "WITH user_data AS (
-            SELECT 
-                l.courseid,
-                COUNT(DISTINCT u.id) AS user_count,
-                " . $this->get_role_concat_sql() . " AS roles
-            FROM {logstore_standard_log} l
-            JOIN {user} u ON l.userid = u.id
-            JOIN {role_assignments} ra ON ra.userid = u.id
-            JOIN {role} r ON ra.roleid = r.id
-            WHERE l.origin = 'ws'
-              AND (" . $DB->sql_like('l.other', ':viewcourse') . "
-                   OR " . $DB->sql_like('l.other', ':mobilecontent') . ")
-              AND (:timelimit_enabled = 0 OR l.timecreated >= (EXTRACT(EPOCH FROM (CURRENT_TIMESTAMP - INTERVAL ':timelimit_days days'))))
-            GROUP BY l.courseid
-        )";
+        // Safe, case‑insensitive LIKE fragments.   
+        $likeview   = $DB->sql_like('l.other', ':viewcourse', false);
+        $likemobile = $DB->sql_like('l.other', ':mobilecontent', false);
+
+        return "
+            WITH user_data AS (
+                SELECT l.courseid,
+                    COUNT(DISTINCT u.id)                AS user_count,
+                    " . $this->get_role_concat_sql() . " AS roles
+                FROM {logstore_standard_log} l
+                JOIN {user}             u  ON u.id = l.userid
+                JOIN {role_assignments} ra ON ra.userid = u.id
+                JOIN {role}             r  ON r.id = ra.roleid
+                WHERE l.origin IN ('ws','mobile') -- ws, mobile only
+                AND ({$likeview} OR {$likemobile})
+                AND l.timecreated >= :starttime  --  (interval‑free)
+                GROUP BY l.courseid
+            )
+        ";
     }
 
     /**

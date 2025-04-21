@@ -37,7 +37,7 @@ interface DataFetchInterface
      * @param int $timeframe The number of days to look back.
      * @return array Fetched plugin usage data.
      */
-    public function fetchData(int $timeframe): array;
+    public function fetchData(int $timeframe): array|string;
 
     /**
      * Applies caching to store and retrieve data efficiently.

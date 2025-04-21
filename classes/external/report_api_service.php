@@ -1,15 +1,5 @@
 <?php
-
 namespace local_pluginusagereporter\external;
-
-/**
- * This file defines the external report API service for Moodle Web Services.
- *
- * Provides a webservice to retrieve plugin usage report data via REST.
- *
- * @since v1.1.1-11 B [Webservice Integration]
- * @package local_pluginusagereporter
- */
 
 use external_api;
 use external_function_parameters;
@@ -17,80 +7,82 @@ use external_single_structure;
 use external_value;
 use external_multiple_structure;
 use local_pluginusagereporter\datafetcher\RawDataFetcher;
-use required_capability_exception;
+use local_pluginusagereporter\exception\report_db_exception;
 
 class report_api_service extends external_api {
-
     /**
-     * Define expected parameters.
+     * Returns description of get_plugin_usage_data() parameters
      *
      * @return external_function_parameters
      */
     public static function get_plugin_usage_data_parameters(): external_function_parameters {
         return new external_function_parameters([
-            'timeframe'     => new external_value(PARAM_INT, 'Timeframe in days', VALUE_OPTIONAL, 365),
-            'pluginfilter'  => new external_value(PARAM_TEXT, 'Filter by plugin name', VALUE_OPTIONAL, ''),
-            'limit'         => new external_value(PARAM_INT, 'Limit number of results', VALUE_OPTIONAL, 100),
-            'offset'        => new external_value(PARAM_INT, 'Pagination offset', VALUE_OPTIONAL, 0)
+            'timeframe'    => new external_value(PARAM_INT,  'Days to look back', VALUE_OPTIONAL, 365),
+            'pluginfilter' => new external_value(PARAM_TEXT, 'Filter by plugin', VALUE_OPTIONAL, ''),
+            'limit'        => new external_value(PARAM_INT,  'Limit',            VALUE_OPTIONAL, 100),
+            'offset'       => new external_value(PARAM_INT,  'Offset',           VALUE_OPTIONAL, 0),
         ]);
     }
 
     /**
-     * Main method exposed as webservice.
+     * Retrieves plugin usage data.
      *
-     * @param int $timeframe
-     * @param string $pluginfilter
-     * @param int $limit
-     * @param int $offset
+     * @param int $timeframe Look back by this many days. (optional, default: 365)
+     * @param string $pluginfilter Filter records by plugin name. (optional, default: '')
+     * @param int $limit Maximum number of records to return. (optional, default: 100)
+     * @param int $offset Offset from the beginning of the dataset. (optional, default: 0)
      * @return array
+     *   status: Either 'success', 'nodata', or 'error'.
+     *   records: An array of plugin usage records, or an empty array if $status is 'nodata'.
+     *   recordcount: The number of records in the dataset.
+     * @throws external_api::create_service_exception If a database error occurs.
      */
     public static function get_plugin_usage_data(int $timeframe = 365, string $pluginfilter = '', int $limit = 100, int $offset = 0): array {
         global $DB;
 
         self::validate_context(\context_system::instance());
-
-        if (!has_capability('local/pluginusagereporter:view', \context_system::instance())) {
-            throw new required_capability_exception(\context_system::instance(), 'local/pluginusagereporter:view', 'nopermissions', '');
-        }
-
-        self::validate_parameters(self::get_plugin_usage_data_parameters(), [
-            'timeframe' => $timeframe,
-            'pluginfilter' => $pluginfilter,
-            'limit' => $limit,
-            'offset' => $offset
-        ]);
+        require_capability('local/pluginusagereporter:view', \context_system::instance());
+        self::validate_parameters(self::get_plugin_usage_data_parameters(), compact('timeframe','pluginfilter','limit','offset'));
 
         $fetcher = new RawDataFetcher($DB);
-        $data = $fetcher->fetch_data($timeframe);
+        $fetcher->setPagination($limit, $offset);
 
-        if ($pluginfilter !== '') {
-            $data = array_filter($data, fn($entry) => $entry['plugin'] === $pluginfilter);
+        try {
+            $records = $fetcher->fetchData($timeframe);
+        } catch (\Throwable $e) {
+            throw new \Exception($e->getMessage());
         }
 
-        $data = array_values(array_slice($data, $offset, $limit));
+        // Empty set.
+        if ($records === 'nodata') {
+            return ['status' => 'nodata', 'records' => [], 'recordcount' => 0];
+        }
+
+        // Optional post‑filter.
+        if ($pluginfilter !== '') {
+            $records = array_filter($records, fn($r) => $r->modulename === $pluginfilter);
+        }
 
         return [
-            'status' => 'success',
-            'records' => $data,
-            'recordcount' => count($data)
+            'status'      => 'success',
+            'records'     => array_values($records),
+            'recordcount' => count($records),
         ];
     }
 
-    /**
-     * Define return structure.
-     *
-     * @return external_single_structure
-     */
     public static function get_plugin_usage_data_returns(): external_single_structure {
         return new external_single_structure([
-            'status' => new external_value(PARAM_TEXT, 'Status'),
-            'records' => new external_multiple_structure(
+            'status'      => new external_value(PARAM_TEXT, 'success|nodata'),
+            'records'     => new external_multiple_structure(
                 new external_single_structure([
-                    'plugin' => new external_value(PARAM_TEXT, 'Plugin name'),
-                    'count'  => new external_value(PARAM_INT, 'Usage count')
-                ])
+                    'modulename' => new external_value(PARAM_TEXT, 'Plugin/module name'),
+                    'coursename' => new external_value(PARAM_TEXT, 'Course'),
+                    'usagecount' => new external_value(PARAM_INT,  'Count'),
+                    'lastused'   => new external_value(PARAM_INT,  'Unix‑time'),
+                ]),
+                'Result set'
             ),
-            'recordcount' => new external_value(PARAM_INT, 'Total number of results')
+            'recordcount' => new external_value(PARAM_INT, 'Number of rows'),
         ]);
     }
 }
