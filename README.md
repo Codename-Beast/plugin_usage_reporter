@@ -1,8 +1,8 @@
 # Plugin Usage Reporter for Moodle
 
 **Version:** 2.1.2  
-**PTU*** 2.1.3
-**Last Updated:** 18.04.2025  
+**PTU:** 2.1.3
+**Last Updated:** 21.04.2025  
 **Author:** Bernd Schreistetter  
 **Compatibility:** Moodle 4.5+ and 5.0
 
