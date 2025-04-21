@@ -13,6 +13,24 @@
 All notable changes to the Plugin Usage Reporter plugin are documented here.
 
 ---
+## v2.1.3 — 2025-04-21
+### ✨ Enhancements
+- **Input validation:** Strong type and range validation for `timeframe` (allowed: 1–3650 days) in RawDataFetcher, preventing invalid or dangerous values.
+- **Cache key safety:** Cache keys sanitized using regular expressions to avoid access or corruption by faulty/injected characters.
+- **SQL role aggregation:** User roles in usage reports are now DB-agnostic and truncated at the SQL level (max 255 chars), boosting compatibility and performance on large courses/platforms.
+- **Error handling:** Extended transformData to robustly throw moodle_exception for unsupported formats, ensuring clear feedback in REST and internal API use.
+- **Configurability:** Fully utilizes plugin settings for cache TTL, caching toggle, and dynamic limits; disables/returns early on empty or misconfigured caches.
+- **Developer Experience:** 
+  - Unified property names for cache keys and error handler.
+  - Refactored constructor to use dependency injection, setting up internal cache and error handling.
+  - Added/modernized inline documentation and comments for better code navigation.
+- **Logging:** Consistent use of Moodle's debugging function for tracing, validation, and issue discovery.
+
+### 🛠️ Fixes (since v2.1.2)
+- Removed dead/unused query parameters and redundant checks in data fetching path.
+- Harmonized exception messages and error code locations.
+---
+
 ## v2.1.2 — 2025-04-18
 ### 🛠️ Fixes
 - Corrected `riskbitmask` in `access.php` from `RISK_SPAM` to `RISK_CONFIG`
@@ -27,7 +45,7 @@ All notable changes to the Plugin Usage Reporter plugin are documented here.
   - Structured fallback logic
   - Sensitive data masking in error messages
   - Logging via internal `logger::add()` calls
-
+---
 ## v2.1.1 — 2025-04-18
 ### ✅ Added
 - Moodle-native Webservice `get_plugin_usage_data` (REST)
@@ -69,14 +87,14 @@ All notable changes to the Plugin Usage Reporter plugin are documented here.
 - ✅ Refactored ErrorHandler for IDE and test compliance
 - ✅ Completed test coverage for data processing components
 - ✅ Language files (English/German) completed
-
+---
 ## v2.0 — 2025-03-01
 - ✅ Major codebase refactor
 - ✅ Interface-based data layer (RawDataFetcher.php)
 - ✅ Initial dashboard layout
 - ✅ Modular settings and configuration
 - ✅ Integrated logging layer
-
+---
 ## v1.0 — 2024-12-01
 - ✅ Initial plugin release
 - ✅ Basic plugin usage statistics
@@ -84,4 +102,4 @@ All notable changes to the Plugin Usage Reporter plugin are documented here.
 - ✅ Support for Moodle 4.5+
 
 ---
-> Last updated: 18.04.2025 — Maintainer: Bernd Schreistetter
+> Last updated: 21.04.2025 — Maintainer: Bernd Schreistetter

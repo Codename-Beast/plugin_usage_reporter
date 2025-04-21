@@ -1,21 +1,37 @@
 <?php
 /**
+ * RawDataFetcher – Retrieves raw plugin usage data from core Moodle tables.
+ *
+ * @package    Eledia local_pluginusagereporter Plugin
+ * @author     Bernd Schreistetter
+ * @version    v2.1.0
+ *
+ * -------------------------------------------------------------------------------------------------
+ * Recent Changes (v1.2.1 – 2025-04-21) [Cross-DB Fixes + Runtime Patch]
  * v1.2.1 – 2025‑04‑21 [Cross‑DB Fixes + Runtime Patch]
+ * + Improved input validation for timeframe parameter: accepts only values in 1..3650 days (10 year max)
+ * + Enforced type safety for critical parameters ($timeframe, $limit, $offset) to prevent query issues
+ * + Extended support for output formats in transformData() and robust error handling on invalid formats
+ * + Cache key sanitation with regex to avoid buggy/malformed cache access
+ * + SQL logic for group_concat+user roles: now DB-agnostic, safely truncated to 255 chars to optimize cross-database compatibility and performance
+ * + Centralized and extended developer/debug logging via Moodle's debugging() API
+ * + Unified and documented naming and internal property usage ($errorHandler, $lastcachekey)
+ * + Refactored and documented constructor (uses dependency injection, prepares cache and error handling)
+ * + Strict separation between cache handling, data transformation, and database querying for improved readability and maintainability
+ * + Enhanced in-line documentation and code readability throughout the class
  *
- * RawDataFetcher – fetches raw plugin‑usage data directly from core tables.
+ * Known for:
+ * - Cross-DB safe SQL for analytics on course/module usage
+ * - Centralized caching logic with TTL configuration and customizable storage
+ * - Built-in support for pagination, filtering, and modular data transformation (JSON, Text, CSV, XML)
+ * - Ready for extension and integration in automated reporting/task runners
  *
- * Key fixes since v1.1.1‑10:
- * - Added missing moodle_exception & dml_exception imports
- * - Escaped LIKE wildcards with sql_like_escape() + case‑insensitive search
- * - Removed unused INTERVAL & LIMIT/OFFSET placeholders (paging via DML helper)
- * - Corrected visibility logic (includehidden flag)
- * - Unified $errorHandler property name
- * - Eliminated unused query parameters
- * - Single DB handle ($this->db) throughout
- *
- * @package    local_pluginusagereporter
- * @author     Bernd Schreistetter
- * 
+ * TODO / Recommendations:
+ * - Consider PSR-3 compliant logging (e.g., Monolog) for broader integration
+ * - Further expand automated test coverage, especially for edge cases and error conditions
+ * - Explore async data fetch/caching for very large sites
+ * - Optional: expose cache status and error log to admin dashboards for better monitoring
+ * -------------------------------------------------------------------------------------------------
  */
 
 namespace local_pluginusagereporter\datafetcher;
