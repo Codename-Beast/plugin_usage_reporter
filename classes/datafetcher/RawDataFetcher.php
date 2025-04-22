@@ -25,12 +25,19 @@
  * - Centralized caching logic with TTL configuration and customizable storage
  * - Built-in support for pagination, filtering, and modular data transformation (JSON, Text, CSV, XML)
  * - Ready for extension and integration in automated reporting/task runners
+ * - PSR-4 compliant class structure for easy integration in Moodle plugin ecosystem
  *
- * TODO / Recommendations:
- * - Consider PSR-3 compliant logging (e.g., Monolog) for broader integration
+ * TODO / Future Improvements:
  * - Further expand automated test coverage, especially for edge cases and error conditions
- * - Explore async data fetch/caching for very large sites
+ * - Explore async data fetch/caching for very large sites with high traffic and data volumes
+ * - Consider implementing a more efficient data structure for caching and filtering (e.g., Redis, Memcached)
+ * - Investigate the possibility of using Moodle's built-in caching mechanisms for better performance
  * - Optional: expose cache status and error log to admin dashboards for better monitoring
+ * - Optional: add a CLI command for manual cache clearing and data fetching
+ * - Optional: add a UI for configuring cache settings and data fetching parameters
+ * - Optional: add a UI for configuring data transformation settings (e.g., CSV delimiter, XML root element)
+ * - Optional: add a UI for configuring data filtering settings (e.g., filter by course, module, user role)
+ * - Optional: add a UI for configuring data export settings (e.g., export to file, send via email)
  * -------------------------------------------------------------------------------------------------
  */
 
