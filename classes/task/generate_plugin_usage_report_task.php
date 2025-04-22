@@ -11,12 +11,20 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+
+/**
+ * Scheduled task to generate and send plugin usage reports.
+ * 
+ * Known issues:
+ * - The task may not work as expected if the plugin usage data is not available in the database.
+ * - The task may fail if the external API is not reachable or returns an error.
+ * - The task may block other scheduled tasks if it takes too long to execute. Possible solution: use a cron job to run the task in the background.
+**/
 namespace local_pluginusagereporter\task;
 
 defined('MOODLE_INTERNAL') || die();
 
 use core\task\scheduled_task;
-use stdClass;
 use local_pluginusagereporter\external\api_handler;
 use local_pluginusagereporter\{ErrorHandler,logger};
 use local_pluginusagereporter\datafetcher\RawDataFetcher;
