@@ -2,13 +2,14 @@
 
 ## Planned for v2.2
 - [x] API rate limiting and usage counters
-- [x] Grafana dashboard example JSON & documentation
 - [x] Extended course-based statistics via Webservice
+- [x] **CLI support for admins** — Allow retrieval of usage data via command-line interface, enabling admins to access and export plugin usage reports directly from the CLI.
 - [ ] Optional exponential backoff logic for retries
 - [ ] Webservice token whitelist & optional API key mode
 - [ ] Optional output formats: CSV endpoint for Webservice
 - [ ] Automated report emailing (configurable via settings)
 - [ ] Code coverage metrics for all core classes
+- [ ] Grafana dashboard example JSON & documentation
 
 All notable changes to the Plugin Usage Reporter plugin are documented here.
 
