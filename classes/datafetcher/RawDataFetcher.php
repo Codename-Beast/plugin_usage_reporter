@@ -92,13 +92,14 @@ class RawDataFetcher implements DataFetchInterface
             // Invalid timeframe, throw an exception
             throw new moodle_exception('error_invalidtimeframe', 'local_pluginusagereporter');
         }
-        // Explicit type conversion
+        // Explicit type conversion to ensure correct data types
         $timeframe = (int)$timeframe;
         $this->limit = (int)$this->limit;
         $this->offset = (int)$this->offset;
         // --- Cache handling ----//
 
         // $cachekey needs to be sanitized before $lastcachekey is set.
+        // Bug occurred in some cases when the cache key contains invalid characters.
         $cachekey = preg_replace('/[^a-zA-Z0-9_]/', '', $cachekey);
         $this->lastcachekey = $cachekey = "plugin_usage_{$timeframe}_{$this->limit}_{$this->offset}";
         $cachingenabled = (bool) get_config('local_pluginusagereporter', 'enable_caching');
