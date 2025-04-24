@@ -4,7 +4,7 @@
  *
  * @package    Eledia local_pluginusagereporter Plugin
  * @author     Bernd Schreistetter
- * @version    v2.1.1.2
+ * @version    v2.1.1
  *
  * -------------------------------------------------------------------------------------------------
  * Recent Changes (v1.2.1 – 2025-04-21) [Cross-DB Fixes + Runtime Patch]
