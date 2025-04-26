@@ -63,7 +63,7 @@ interface DataFetchInterface
      * @param string $format The desired output format ('json', 'csv', 'txt', etc.).
      * @return mixed Returns data in the specified format.
      */
-    public function transformData(array $data, string $format);
+    public function transformData(array $data, string $format) : mixed;
 
     /**
      * Validates the retrieved data to ensure it meets required standards.
