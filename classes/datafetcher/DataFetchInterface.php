@@ -38,8 +38,8 @@ interface DataFetchInterface
      * @param int|null $limit The maximum number of records to fetch.
      * @param int|null $offset The offset for pagination.
      * @return array Returns an array of plugin usage data.
+     * 
      */
-    //public function fetchData(int $timeframe, int $limit, int $offset): array;
     public function fetchData(?int $timeframe = null, ?int $limit = null, ?int $offset = null): array;
 
     /**

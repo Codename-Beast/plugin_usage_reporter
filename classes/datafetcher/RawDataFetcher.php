@@ -307,6 +307,11 @@ class RawDataFetcher implements DataFetchInterface
      * @return array An array of parameters to be used in the SQL query.
      */
     private function build_query_params(int $timeframe): array {
+        // Validate the timeframe parameter
+        if ($timeframe = null || $timeframe <= 0 || $timeframe > 3650) {
+            throw new \moodle_exception('error_invalidtimeframe', 'local_pluginusagereporter');
+        }
+
         $starttime = time() - ($timeframe * DAYSECS);
         return [
             'starttime'     => $starttime,
