@@ -36,7 +36,7 @@ interface DataFetchInterface
      * @param int $timeframe The number of days to look back.
      * @return array Fetched plugin usage data.
      */
-    public function fetchData(int $timeframe): array|string;
+    public function fetchData(?int $timeframe = null, ?int $limit = null, ?int $offset = null): array;
 
     /**
      * Applies caching to store and retrieve data efficiently.
@@ -54,7 +54,7 @@ interface DataFetchInterface
      * @param array $criteria Associative array of filter criteria.
      * @return array Returns filtered plugin data.
      */
-    public function filterData(array $criteria): array;
+    public function filterData(?string $pluginfilter = null, ?int $minusagecount = null): array;
 
     /**
      * Transforms raw data into the desired format (e.g., JSON, XML, CSV, Plaintext).

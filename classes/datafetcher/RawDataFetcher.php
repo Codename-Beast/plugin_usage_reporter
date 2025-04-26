@@ -92,60 +92,56 @@ class RawDataFetcher implements DataFetchInterface
      * @throws moodle_exception If the timeframe is invalid or if a database error occurs.
      * @throws dml_exception If a database error occurs.
      */
-    public function fetchData(int $timeframe): array|string
+    public function fetchData(?int $timeframe = null, ?int $limit = null, ?int $offset = null): array 
     {
-        // ---  Validate input ---//
-        if ($timeframe <= 0 || $timeframe > 3650) {// 10 years max
-            // Invalid timeframe, throw an exception
-            throw new moodle_exception('error_invalidtimeframe', 'local_pluginusagereporter');
+        // --- Set defaults if parameters are not provided --- //
+        $timeframe = $timeframe ?? $this->timeframe;
+        $limit = $limit ?? $this->limit;
+        $offset = $offset ?? $this->offset;
+
+        // --- Validate timeframe --- //
+        if ($timeframe <= 0 || $timeframe > 3650) {
+            throw new \moodle_exception('error_invalidtimeframe', 'local_pluginusagereporter');
         }
-        // Explicit type conversion to ensure correct data types
-        $timeframe = (int)$timeframe;
-        $this->limit = (int)$this->limit;
-        $this->offset = (int)$this->offset;
-        // --- Cache handling ----//
 
-        // $cachekey needs to be sanitized before $lastcachekey is set.
-        // Bug occurred in some cases when the cache key contains invalid characters.
-        $cachekey = preg_replace('/[^a-zA-Z0-9_]/', '', $cachekey);
-        $this->lastcachekey = $cachekey = "plugin_usage_{$timeframe}_{$this->limit}_{$this->offset}";
-        $cachingenabled = (bool) get_config('local_pluginusagereporter', 'enable_caching');
-        $cachettl       = (int) get_config('local_pluginusagereporter', 'cache_ttl') ?: 3600;
+        // --- Build cache key and sanitize --- //
+        $rawcachekey = "plugin_usage_{$timeframe}_{$limit}_{$offset}";
+        $cachekey = preg_replace('/[^a-zA-Z0-9_]/', '', $rawcachekey);
+        $this->lastcachekey = $cachekey;
 
+        $this->cache = $CACHE->get_cache('local_pluginusagereporter', 'plugin_usage');
+
+        $cachingenabled = (bool)get_config('local_pluginusagereporter', 'enable_caching');
+        $cachettl = (int)get_config('local_pluginusagereporter', 'cache_ttl') ?: 3600;
+
+        // --- Try cache first --- //
         if ($cachingenabled && ($cached = $this->cache->get($cachekey)) !== false) {
-            return $cached ?: 'nodata';
+            return $cached;
         }
 
-        // --- Build query -----//
+        // --- Build query --- //
         $params = $this->build_query_params($timeframe);
-        $sql    = $this->build_sql_query();
+        $sql = $this->build_sql_query();
 
-        // --- Execute query -----//
+        // --- Execute query --- //
         try {
-            // pass limit/offset via DML helper – cross‑DB compatible
-            $records = $this->db->get_records_sql($sql, $params, $this->offset, $this->limit);
-        } catch (dml_exception $e) {
-            // Catch dml_exception and re‑throw as moodle_exception so WS & CLI handle it natively
-            throw new moodle_exception(
-                'error_db',
-                'local_pluginusagereporter',
-                '',
-                null,
-                $e->getMessage()
-            );
+            $records = $DB->get_records_sql($sql, $params, $offset, $limit);
+        } catch (\dml_exception $e) {
+            throw new \moodle_exception('error_db', 'local_pluginusagereporter', '', null, $e->getMessage());
         }
-        // --- Post-processing: Log some debug info, add caching --- //
+
+        // --- Post-processing --- //
         if (empty($records)) {
-            $this->log_debug("No Data has been found", ['records' => $records]);
-            return 'nodata';
+            $this->log_debug('No Data has been found', ['records' => $records]);
+            return [];
         }
 
         $records = array_values($records);
 
         if ($cachingenabled) {
             $this->cache->set($cachekey, $records, $cachettl);
-            $this->lastcachekey = $cachekey;
         }
+
         return $records;
     }
 
@@ -234,45 +230,47 @@ class RawDataFetcher implements DataFetchInterface
      *               If no data is found in the cache or no items match the criteria,
      *               an empty array is returned.
      */
-    public function filterData(array $criteria = []): array {
+    public function filterData(?string $pluginfilter = null, ?int $minusagecount = null): array {
+        global $CACHE; // Moodle Cache API.
 
         if (empty($this->lastcachekey)) {
-        // No previous cache key found, fallback (not ideal, but prevents fatal error).
-        return [];
-}
-        //  Determine the most recent cache‑key that fetchData() used.
-        //  Fallback: legacy static key, so older caches remain nutzbar.
-        $cachekey = $this->lastcachekey
-            ?? "plugin_usage_{$this->limit}_{$this->offset}";
-
-        $data = $this->cache->get($cachekey) ?: [];
-        if (empty($data) || empty($criteria)) {
-            // nothing cached or no filter requested → return as is / empty.
-            $this->log_debug('filterData(): no cached data or no criteria', [
-                'key' => $cachekey,
-                'criteria' => $criteria,
-            ]);
-            return $data;
+            // No cache key available, return empty result.
+            return [];
         }
 
-        // Apply AND‑filter: every criterion must match.
-        $result = array_values(array_filter($data, function ($row) use ($criteria) {
-            foreach ($criteria as $field => $expected) {
-                if (!property_exists($row, $field) || $row->$field != $expected) {
-                    return false;
-                }
+        $cache = $CACHE->get_cache('local_pluginusagereporter', 'plugin_usage');
+        $cachedData = $cache->get($this->lastcachekey);
+
+        if ($cachedData === false) {
+            // Cache miss, no data available.
+            return [];
+        }
+
+        // If no filters are applied, return all cached data.
+        if ($pluginfilter === null && $minusagecount === null) {
+            return $cachedData;
+        }
+
+        // Apply filters.
+        $filteredData = array_filter($cachedData, function($record) use ($pluginfilter, $minusagecount) {
+            if (!is_array($record)) {
+                return false;
             }
-            return true;
-        }));
 
-        $this->log_debug('filterData(): filter complete', [
-            'key'       => $cachekey,
-            'criteria'  => $criteria,
-            'hits'      => count($result),
-            'total'     => count($data),
-        ]);
+            $matchesPlugin = true;
+            if ($pluginfilter !== null && isset($record['modulename'])) {
+                $matchesPlugin = stripos($record['modulename'], $pluginfilter) !== false;
+            }
 
-        return $result;
+            $matchesUsage = true;
+            if ($minusagecount !== null && isset($record['usagecount'])) {
+                $matchesUsage = (int)$record['usagecount'] >= $minusagecount;
+            }
+
+            return $matchesPlugin && $matchesUsage;
+        });
+
+        return array_values($filteredData); // Reset array keys.
     }
 
     /**
