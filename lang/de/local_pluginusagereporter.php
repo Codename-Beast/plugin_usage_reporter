@@ -62,3 +62,28 @@ $string['generation_error'] = 'Die Berichtserstellung ist fehlgeschlagen. Bitte 
 $string['https_required'] = 'Nur sichere HTTPS-Endpunkte sind erlaubt.';
 $string['error_invalidtimeframe'] = 'Ungültiger Zeitraum: Der Wert muss größer als 0 sein.';
 
+// Fehlermeldungen
+$string['error_invalidtimeframe'] = 'Ungültiger Zeitraum angegeben.';
+$string['error_invalidformat'] = 'Ungültiges Format angegeben.';
+$string['error_db'] = 'Beim Abrufen der Plugin-Nutzungsdaten ist ein Datenbankfehler aufgetreten.';
+$string['error_unauthorized'] = 'Unberechtigter Zugriff. Sie haben keine Berechtigung, Plugin-Nutzungsdaten anzuzeigen.';
+$string['error_rate_limit'] = 'Rate-Limit überschritten. Bitte versuchen Sie es später erneut.';
+$string['error_missing_apikey'] = 'API-Schlüssel fehlt oder ist ungültig.';
+
+// Einstellungen
+$string['enable_notifications'] = 'E-Mail-Benachrichtigungen aktivieren';
+$string['enable_notifications_desc'] = 'Wenn aktiviert, sendet das System Benachrichtigungen über die Ergebnisse der Berichtserstellung per E-Mail.';
+
+$string['notification_email'] = 'Empfänger E-Mail-Adresse für Benachrichtigungen';
+$string['notification_email_desc'] = 'Die E-Mail-Adresse, an die Benachrichtigungen über die Berichtserstellung gesendet werden sollen.';
+
+$string['external_api_key'] = 'Externer API-Schlüssel';
+$string['external_api_key_desc'] = 'API-Schlüssel, der zur Authentifizierung externer API-Anfragen an den Bericht benötigt wird.';
+
+$string['external_api_url'] = 'Externe API-URL';
+$string['external_api_url_desc'] = 'Die URL des externen Systems, an das die Plugin-Nutzungsdaten gesendet werden sollen.';
+// Datenschutz-Strings
+$string['privacy:metadata:log'] = 'Speichert Protokolleinträge im Zusammenhang mit der Erstellung von Plugin-Nutzungsberichten.';
+$string['privacy:metadata:log:level'] = 'Das Protokollniveau (Info, Warnung, Fehler) des Eintrags.';
+$string['privacy:metadata:log:message'] = 'Der Nachrichteninhalt des Protokolleintrags.';
+$string['privacy:metadata:log:timecreated'] = 'Die Zeit, zu der der Protokolleintrag erstellt wurde.';

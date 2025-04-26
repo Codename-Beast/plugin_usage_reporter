@@ -204,6 +204,27 @@ if ($hassiteconfig) {
         0
     ));
 
+    // --- Notification Settings ---
+$settings->add(new admin_setting_heading(
+    'local_pluginusagereporter/notificationsettings',
+    get_string('notificationsettings', 'local_pluginusagereporter'),
+    ''
+));
+
+$settings->add(new admin_setting_configcheckbox(
+    'local_pluginusagereporter/enable_notifications',
+    get_string('enable_notifications', 'local_pluginusagereporter'),
+    get_string('enable_notifications_desc', 'local_pluginusagereporter'),
+    0
+));
+
+$settings->add(new admin_setting_configtext(
+    'local_pluginusagereporter/notification_email',
+    get_string('notification_email', 'local_pluginusagereporter'),
+    get_string('notification_email_desc', 'local_pluginusagereporter'),
+    ''
+));
+
     // Add to admin tree
     $ADMIN->add('localplugins', $settings);
 }

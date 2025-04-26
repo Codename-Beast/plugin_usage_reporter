@@ -94,3 +94,29 @@ $string['cachingsettings'] = 'Caching Settings';
 $string['cachingsettings_desc'] = 'Configure caching behavior for report data';
 $string['securitysettings'] = 'Security Settings';
 $string['securitysettings_desc'] = 'Security and access control configurations';
+// Error messages
+$string['error_invalidtimeframe'] = 'Invalid timeframe provided.';
+$string['error_invalidformat'] = 'Invalid format specified.';
+$string['error_db'] = 'A database error occurred while fetching plugin usage data.';
+$string['error_unauthorized'] = 'Unauthorized access. You do not have permission to view plugin usage data.';
+$string['error_rate_limit'] = 'Rate limit exceeded. Please try again later.';
+$string['error_missing_apikey'] = 'API key is missing or invalid.';
+
+// Settings
+$string['enable_notifications'] = 'Enable Email Notifications';
+$string['enable_notifications_desc'] = 'If enabled, the system will send email notifications for report generation results.';
+
+$string['notification_email'] = 'Notification Recipient Email';
+$string['notification_email_desc'] = 'The email address where notifications about report generation will be sent.';
+
+$string['external_api_key'] = 'External API Key';
+$string['external_api_key_desc'] = 'API key required to authenticate external API requests to the report API.';
+
+$string['external_api_url'] = 'External API URL';
+$string['external_api_url_desc'] = 'The URL of the external system to which plugin usage data should be sent.';
+
+// Privacy strings
+$string['privacy:metadata:log'] = 'Stores log entries related to the generation of plugin usage reports.';
+$string['privacy:metadata:log:level'] = 'The log level (info, warning, error) of the entry.';
+$string['privacy:metadata:log:message'] = 'The message content of the log entry.';
+$string['privacy:metadata:log:timecreated'] = 'The time when the log entry was created.';

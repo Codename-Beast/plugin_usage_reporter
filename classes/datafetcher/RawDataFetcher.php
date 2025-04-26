@@ -56,7 +56,7 @@ class RawDataFetcher implements DataFetchInterface
     private cache $cache;
     private ErrorHandler $errorHandler;
     /** remembers the key used in the most recent fetchData() call */
-    private ?string $lastcachekey = null;   
+    private string $lastcachekey = ''; 
 
     /**
      * Constructor.
@@ -144,6 +144,7 @@ class RawDataFetcher implements DataFetchInterface
 
         if ($cachingenabled) {
             $this->cache->set($cachekey, $records, $cachettl);
+            $this->lastcachekey = $cachekey;
         }
         return $records;
     }
@@ -234,6 +235,11 @@ class RawDataFetcher implements DataFetchInterface
      *               an empty array is returned.
      */
     public function filterData(array $criteria = []): array {
+
+        if (empty($this->lastcachekey)) {
+        // No previous cache key found, fallback (not ideal, but prevents fatal error).
+        return [];
+}
         //  Determine the most recent cache‑key that fetchData() used.
         //  Fallback: legacy static key, so older caches remain nutzbar.
         $cachekey = $this->lastcachekey
