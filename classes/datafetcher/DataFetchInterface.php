@@ -32,10 +32,14 @@ namespace local_pluginusagereporter\datafetcher;
 interface DataFetchInterface
 {
     /**
-     * Fetches plugin usage data.
-     * @param int $timeframe The number of days to look back.
-     * @return array Fetched plugin usage data.
+     * Fetches plugin usage data from the database.
+     *
+     * @param int|null $timeframe The timeframe in days for which to fetch data.
+     * @param int|null $limit The maximum number of records to fetch.
+     * @param int|null $offset The offset for pagination.
+     * @return array Returns an array of plugin usage data.
      */
+    //public function fetchData(int $timeframe, int $limit, int $offset): array;
     public function fetchData(?int $timeframe = null, ?int $limit = null, ?int $offset = null): array;
 
     /**
