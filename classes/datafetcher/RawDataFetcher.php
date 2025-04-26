@@ -170,7 +170,7 @@ class RawDataFetcher implements DataFetchInterface
     * @return mixed Returns the transformed data in the specified format or handles an error if the format is unsupported.
     * @throws moodle_exception If the given format is not supported
     */
-    public function transformData(array $data, string $format)
+    public function transformData(array $data, string $format) : mixed
     {
         if (!in_array(strtolower($format), ['json', 'txt', 'csv', 'xml'])) {
             	throw new moodle_exception('error_invalidformat', 'local_pluginusagereporter');
