@@ -92,57 +92,70 @@ class RawDataFetcher implements DataFetchInterface
      * @throws moodle_exception If the timeframe is invalid or if a database error occurs.
      * @throws dml_exception If a database error occurs.
      */
-    public function fetchData(?int $timeframe = null, ?int $limit = null, ?int $offset = null): array 
-    {
-        // --- Set defaults if parameters are not provided --- //
+    public function fetchData(?int $timeframe = null, ?int $limit = null, ?int $offset = null): array {
+        global $DB, $CACHE;
+        //Timeframe is the number of days to look back from the current time.
         $timeframe = $timeframe ?? $this->timeframe;
+        //Limit is the maximum number of records to retrieve.
         $limit = $limit ?? $this->limit;
+        //Offset is the number of records to skip before starting to retrieve records.
         $offset = $offset ?? $this->offset;
-
-        // --- Validate timeframe --- //
-        if ($timeframe <= 0 || $timeframe > 3650) {
+        // Validate the timeframe parameter.
+        if ($timeframe === null || $timeframe <= 0 || $timeframe > 3650) {
             throw new \moodle_exception('error_invalidtimeframe', 'local_pluginusagereporter');
         }
-
-        // --- Build cache key and sanitize --- //
+        //rawcachekey is the key used to store the data in the cache.
         $rawcachekey = "plugin_usage_{$timeframe}_{$limit}_{$offset}";
+        //Sanitize the cache key to avoid any special characters that could cause issues.
         $cachekey = preg_replace('/[^a-zA-Z0-9_]/', '', $rawcachekey);
         $this->lastcachekey = $cachekey;
-
+        // Check if the cache is enabled and if the data is already cached.
         $this->cache = $CACHE->get_cache('local_pluginusagereporter', 'plugin_usage');
-
+        // Check if caching is enabled in the plugin settings.
         $cachingenabled = (bool)get_config('local_pluginusagereporter', 'enable_caching');
         $cachettl = (int)get_config('local_pluginusagereporter', 'cache_ttl') ?: 3600;
-
-        // --- Try cache first --- //
+        // If caching is enabled and the data is already cached, return the cached data.
         if ($cachingenabled && ($cached = $this->cache->get($cachekey)) !== false) {
-            return $cached;
+            return [
+                'status' => empty($cached) ? 'nodata' : 'ok',
+                'records' => $cached,
+                'recordcount' => count($cached)
+            ];
         }
-
-        // --- Build query --- //
+        // If the data is not cached, fetch it from the database.
+        // build_query_params() returns an array of parameters for the SQL query.
         $params = $this->build_query_params($timeframe);
+        // build_sql_query() returns the SQL query to retrieve the raw data for the report.
         $sql = $this->build_sql_query();
-
-        // --- Execute query --- //
+        // try to fetch the data from the database.
+        // If an error occurs, log it and throw a moodle_exception.
+        // The $params array contains the parameters for the SQL query.
         try {
             $records = $DB->get_records_sql($sql, $params, $offset, $limit);
         } catch (\dml_exception $e) {
             throw new \moodle_exception('error_db', 'local_pluginusagereporter', '', null, $e->getMessage());
         }
-
-        // --- Post-processing --- //
+        // If no records are found, log it and return an empty array.
         if (empty($records)) {
             $this->log_debug('No Data has been found', ['records' => $records]);
-            return [];
+            return [
+                'status' => 'nodata',
+                'records' => [],
+                'recordcount' => 0
+            ];
         }
-
+        // If records are found, log the number of records and the cache key used.
         $records = array_values($records);
 
         if ($cachingenabled) {
             $this->cache->set($cachekey, $records, $cachettl);
         }
 
-        return $records;
+        return [
+            'status' => 'ok',
+            'records' => $records,
+            'recordcount' => count($records)
+        ];
     }
 
     /**
