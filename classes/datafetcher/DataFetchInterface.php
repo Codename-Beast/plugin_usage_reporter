@@ -43,6 +43,14 @@ interface DataFetchInterface
     public function fetchData(?int $timeframe = null, ?int $limit = null, ?int $offset = null): array;
 
     /**
+     * Fetches detailed plugin usage data including user counts and roles.
+     *
+     * @param int|null $starttime Start timestamp.
+     * @param int|null $endtime End timestamp.
+     * @return array
+     */
+    public function fetchExtendedData(?int $starttime = null, ?int $endtime = null): array;
+    /**
      * Applies caching to store and retrieve data efficiently.
      *
      * @param string $key The cache key.

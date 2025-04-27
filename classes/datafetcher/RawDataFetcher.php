@@ -146,6 +146,95 @@ class RawDataFetcher implements DataFetchInterface
     }
 
     /**
+     * Fetches detailed plugin usage data including user counts and roles.
+     *
+     * @param int|null $starttime Start timestamp for data retrieval.
+     * @param int|null $endtime End timestamp for data retrieval.
+     * @return array Returns detailed plugin usage data.
+     * @throws \moodle_exception If database error occurs.
+    */
+    public function fetchExtendedData(?int $starttime = null, ?int $endtime = null): array {
+        global $DB;
+
+        $starttime = $starttime ?? (time() - (30 * DAYSECS)); // Default: last 30 days
+        $endtime = $endtime ?? time();
+
+        // Check DB type first.
+        $dbfamily = $DB->get_dbfamily(); // Returns 'mysql', 'postgres', etc.
+
+        if (!in_array($dbfamily, ['mysql', 'postgres'])) {
+            throw new \moodle_exception('error_db_unsupported', 'local_pluginusagereporter');
+        }
+
+        // Check if MySQL < 8 (doesn't support CTEs properly)
+        if ($dbfamily === 'mysql' && version_compare($DB->get_server_info(), '8.0', '<')) {
+            throw new \moodle_exception('error_db_requires_mysql8', 'local_pluginusagereporter');
+        }
+
+        $params = [
+            'starttime' => $starttime,
+            'endtime' => $endtime,
+            'viewcourse' => '%view course%',
+            'mobilecontent' => '%mobile_content%',
+            'includehidden' => 1 // Example: modify if needed
+        ];
+
+        $sql = "
+            WITH user_data AS (
+                SELECT
+                    l.courseid,
+                    COUNT(DISTINCT u.id) AS user_count,
+                    GROUP_CONCAT(DISTINCT r.shortname ORDER BY r.shortname ASC SEPARATOR ', ') AS roles
+                FROM {logstore_standard_log} l
+                INNER JOIN {user} u ON u.id = l.userid
+                INNER JOIN {role_assignments} ra ON ra.userid = u.id
+                INNER JOIN {role} r ON r.id = ra.roleid
+                WHERE l.origin IN ('web', 'mobile')
+                AND l.timecreated BETWEEN :starttime AND :endtime
+                GROUP BY l.courseid
+            )
+            
+            SELECT
+                m.name AS modulename,
+                c.fullname AS coursename,
+                COUNT(cm.id) AS usagecount,
+                MAX(l.timecreated) AS lastused,
+                ud.user_count,
+                ud.roles
+            FROM {course_modules} cm
+            INNER JOIN {modules} m ON m.id = cm.module
+            INNER JOIN {course} c ON c.id = cm.course
+            LEFT JOIN (
+                SELECT
+                    l.courseid,
+                    l.timecreated
+                FROM {logstore_standard_log} l
+                WHERE l.timecreated BETWEEN :starttime AND :endtime
+                AND (l.other LIKE :viewcourse OR l.other LIKE :mobilecontent)
+            ) l ON l.courseid = c.id
+            LEFT JOIN user_data ud ON ud.courseid = c.id
+            WHERE
+                (:includehidden = 1 OR c.visible = 1)
+                AND cm.added >= :starttime
+            GROUP BY
+                m.name,
+                c.fullname,
+                ud.user_count,
+                ud.roles
+            ORDER BY
+                usagecount DESC
+        ";
+
+        try {
+            $records = $DB->get_records_sql($sql, $params);
+        } catch (\dml_exception $e) {
+            throw new \moodle_exception('error_db', 'local_pluginusagereporter', '', null, $e->getMessage());
+        }
+
+        return array_values($records ?: []);
+    }
+
+    /**
      * Applies caching to store and retrieve data efficiently.
      *
      * @param string $key The cache key.
@@ -308,7 +397,7 @@ class RawDataFetcher implements DataFetchInterface
      */
     private function build_query_params(int $timeframe): array {
         // Validate the timeframe parameter
-        if ($timeframe = null || $timeframe <= 0 || $timeframe > 3650) {
+        if ($timeframe === null || $timeframe <= 0 || $timeframe > 3650) {
             throw new \moodle_exception('error_invalidtimeframe', 'local_pluginusagereporter');
         }
 
@@ -394,7 +483,7 @@ class RawDataFetcher implements DataFetchInterface
               JOIN {user} u ON u.id = l.userid
               JOIN {role_assignments} ra ON ra.userid = u.id
               JOIN {role} r ON r.id = ra.roleid
-             WHERE l.origin IN ('ws','mobile')
+             WHERE l.origin IN ('web','mobile')
                AND ({$likeview} OR {$likemobile})
                AND l.timecreated >= :starttime
              GROUP BY l.courseid
