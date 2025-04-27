@@ -243,6 +243,15 @@ class RawDataFetcher implements DataFetchInterface
         } catch (\dml_exception $e) {
             throw new \moodle_exception('error_db', 'local_pluginusagereporter', '', null, $e->getMessage());
         }
+        // If no records are found, log it and return an empty array.
+         if (empty($records)) {
+            $this->log_debug('No Data has been found', ['records' => $records]);
+            return [
+                'status' => 'nodata',
+                'records' => [],
+                'recordcount' => 0
+            ];
+        }
 
         return array_values($records ?: []);
     }
