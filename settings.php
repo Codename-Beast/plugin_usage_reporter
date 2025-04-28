@@ -5,6 +5,8 @@
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 
+//Todo : Splitt settings into multiple files for better maintainability
+
 defined('MOODLE_INTERNAL') || die();
 
 if ($hassiteconfig) {
@@ -32,14 +34,6 @@ if ($hassiteconfig) {
         get_string('timeframe_desc', 'local_pluginusagereporter'),
         90,
         PARAM_INT
-    ));
-    //include hidden courses in report
-    // This setting allows the user to include hidden courses in the plugin usage report.
-    $settings->add(new admin_setting_configcheckbox(
-        'local_pluginusagereporter/includehidden',
-        get_string('includehidden', 'local_pluginusagereporter'),
-        get_string('includehidden_desc', 'local_pluginusagereporter'),
-        0
     ));
 
     // Data Collection

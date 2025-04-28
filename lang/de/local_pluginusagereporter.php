@@ -1,107 +1,89 @@
 <?php
-/**
- * Deutsche Sprachdatei für Plugin Usage Reporter
- *
- * @package    local_pluginusagereporter
- * @copyright  2024 Bernd Schreistetter
- * @license    MIT https://opensource.org/licenses/MIT
- */
+// This file is part of local_pluginusagereporter – Moodle plugin for plugin usage reporting.
+// Licensed under the GPL v3 or later – see https://www.gnu.org/copyleft/gpl.html
 
 defined('MOODLE_INTERNAL') || die();
 
-// Core
+// Allgemein
 $string['pluginname'] = 'Plugin Usage Reporter';
-$string['taskname'] = 'Generate Usage Report Task';
+$string['privacy:metadata'] = 'Das Plugin speichert keine personenbezogenen Daten.';
 
-// General Settings
-$string['generalsettings'] = 'Allgemeine Einstellungen';
-$string['timeframe'] = 'Berichtszeitraum (Tage)';
-$string['timeframe_desc'] = 'Anzahl der Tage, die im Bericht berücksichtigt werden sollen.';
-$string['itemsperpage'] = 'Einträge pro Seite';
-$string['itemsperpage_desc'] = 'Anzahl der Berichtseinträge, die pro Seite im Dashboard angezeigt werden.';
-$string['includehidden'] = 'Versteckte Kurse einbeziehen';
-$string['includehidden_desc'] = 'Versteckte Kurse in die Nutzungsstatistiken einbeziehen.';
-$string['enabledebug'] = 'Debug-Modus aktivieren';
-$string['enabledebug_desc'] = 'Detaillierte Protokollierung und Entwicklermeldungen aktivieren (nur für Entwicklungsumgebungen empfohlen).';
+// Dashboard / Übersicht
+$string['dashboardtitle'] = 'Plugin Usage Dashboard';
+$string['action_details'] = 'Details anzeigen';
+$string['report_entries'] = 'Einträge';
+$string['id'] = 'ID';
+$string['date'] = 'Datum';
+$string['timeframe'] = 'Zeitraum';
+$string['entries'] = 'Einträge';
+$string['actions'] = 'Aktionen';
+$string['user'] = 'Benutzer';
+$string['createdby'] = 'Erstellt von';
+$string['createdat'] = 'Erstellt am';
+$string['deleted_success'] = 'Bericht wurde erfolgreich gelöscht.';
+$string['delete_failed'] = 'Löschen des Berichts fehlgeschlagen.';
+$string['no_reports_found'] = 'Keine gespeicherten Berichte gefunden.';
+
+// Manueller API-Trigger
+$string['manualtrigger'] = 'Bericht manuell generieren und senden';
+$string['manualtrigger_desc'] = 'Hier klicken, um einen Plugin-Nutzungsbericht manuell zu erstellen und zu senden.';
+
+// Benachrichtigungen
+$string['enable_notifications'] = 'E-Mail-Benachrichtigungen aktivieren';
+$string['enable_notifications_desc'] = 'E-Mail-Benachrichtigungen für Ereignisse und API-Auslöser versenden.';
+$string['notification_email'] = 'E-Mail-Adresse für Benachrichtigungen';
 
 // Caching
-$string['enablecaching'] = 'Caching aktivieren';
-$string['enablecaching_desc'] = 'Berichtsdaten zwischenspeichern, um die Leistung zu verbessern.';
-$string['cachettl'] = 'Cache-Lebensdauer';
-$string['cachettl_desc'] = 'Zeit in Sekunden, bis der Cache abläuft.';
+$string['enable_caching'] = 'Caching aktivieren';
+$string['enable_caching_desc'] = 'Caching für Plugin-Berichte aktivieren oder deaktivieren.';
+$string['cache_ttl'] = 'Cache Lebensdauer (Sekunden)';
+$string['cache_ttl_desc'] = 'Gültigkeitsdauer für Cache-Einträge in Sekunden.';
 
-// Tasks
-$string['tasksettings'] = 'Geplante Aufgaben & Wiederholungen';
-$string['enablescheduledtask'] = 'Geplante Aufgabe aktivieren';
-$string['enablescheduledtask_desc'] = 'Berichte automatisch über den Cron generieren.';
-$string['taskretries'] = 'Wiederholungsversuche bei Fehlern';
-$string['taskretries_desc'] = 'Anzahl der Wiederholungsversuche bei fehlgeschlagenen Aufgaben.';
-$string['retrydelay'] = 'Wartezeit zwischen Wiederholungen';
-$string['retrydelay_desc'] = 'Verzögerung in Sekunden zwischen Wiederholungsversuchen.';
+// Event API Trigger
+$string['enable_event_api'] = 'Event-basierter API-Auslöser aktivieren';
+$string['enable_event_api_desc'] = 'Berichte automatisch bei bestimmten Moodle-Ereignissen auslösen.';
 
-// API Settings
-$string['apisettings'] = 'API Einstellungen';
-$string['enableexternalapi'] = 'Externe API aktivieren';
-$string['enableexternalapi_desc'] = 'Integration mit externen Monitoringsystemen aktivieren.';
-$string['externalapiurl'] = 'API-Endpunkt URL';
-$string['externalapiurl_desc'] = 'Nur HTTPS-Verbindungen sind zulässig.';
+// Aufgaben
+$string['enable_scheduled_task'] = 'Geplante Aufgaben aktivieren';
+$string['retry_delay'] = 'Wiederholungsverzögerung (Sekunden)';
+$string['autodelete_days'] = 'Berichte nach (Tagen) automatisch löschen';
 
-// Status (optional)
-$string['status_starting'] = 'Berichtserstellung wird gestartet...';
-$string['status_complete'] = 'Berichtserstellung abgeschlossen';
-$string['status_failed'] = 'Berichtserstellung fehlgeschlagen';
-$string['status_retrying'] = 'Wiederhole fehlgeschlagene Aufgabe...';
+// Sicherheit
+$string['ip_whitelist'] = 'IP-Whitelist (erlaubte IPs)';
+$string['admin_override'] = 'Admin-Override zulassen (IP-Restriktionen umgehen)';
 
-// Output Types (optional)
-$string['reporttype_html'] = 'HTML-Bericht';
-$string['reporttype_csv'] = 'CSV-Export';
-$string['reporttype_xml'] = 'XML-Feed';
+// API Einstellungen
+$string['rate_limit'] = 'API-Rate-Limit (Anfragen)';
+$string['rate_limit_window'] = 'API-Rate-Limit-Zeitfenster (Sekunden)';
 
-// Fehler-/Validierungsmeldungen
-$string['generation_error'] = 'Die Berichtserstellung ist fehlgeschlagen. Bitte kontaktiere den Administrator.';
-$string['https_required'] = 'Nur sichere HTTPS-Endpunkte sind erlaubt.';
-$string['error_invalidtimeframe'] = 'Ungültiger Zeitraum: Der Wert muss größer als 0 sein.';
+// Datensammlung
+$string['enablelogging'] = 'Event-Logging aktivieren';
+$string['autodelete'] = 'Automatisches Löschen von gespeicherten Berichten nach (Tagen)';
+$string['cli_logging'] = 'CLI-Logging für Systemaktionen aktivieren';
+
+// Allgemeine Einstellungen
+$string['defaulttimeframe'] = 'Standard-Zeitraum (Tage)';
+$string['includehidden'] = 'Versteckte Kurse einbeziehen';
+
+// Tabs
+$string['generalsettings'] = 'Allgemeine Einstellungen';
+$string['cachingsettings'] = 'Caching-Einstellungen';
+$string['cachingsettings_desc'] = 'Konfiguriere das Verhalten für Berichtscaching';
+$string['securitysettings'] = 'Sicherheitseinstellungen';
+$string['securitysettings_desc'] = 'Konfiguration für Zugriff und Sicherheit';
+$string['datacollectionsettings'] = 'Einstellungen zur Datensammlung';
+$string['tasksettings'] = 'Automatisierungs- und Aufgaben-Einstellungen';
+$string['apisettings'] = 'API-Einstellungen';
+$string['notificationsettings'] = 'Benachrichtigungseinstellungen';
 
 // Fehlermeldungen
 $string['error_invalidtimeframe'] = 'Ungültiger Zeitraum angegeben.';
-$string['error_invalidformat'] = 'Ungültiges Format angegeben.';
-$string['error_db'] = 'Beim Abrufen der Plugin-Nutzungsdaten ist ein Datenbankfehler aufgetreten.';
-$string['error_unauthorized'] = 'Unberechtigter Zugriff. Sie haben keine Berechtigung, Plugin-Nutzungsdaten anzuzeigen.';
-$string['error_rate_limit'] = 'Rate-Limit überschritten. Bitte versuchen Sie es später erneut.';
-$string['error_missing_apikey'] = 'API-Schlüssel fehlt oder ist ungültig.';
+$string['error_db'] = 'Ein Datenbankfehler ist aufgetreten.';
+$string['error_db_unsupported'] = 'Der Datenbanktyp wird für diese Funktion nicht unterstützt.';
+$string['error_db_requires_mysql8'] = 'Diese Funktion erfordert MySQL 8.0 oder neuer.';
+$string['error_invalidformat'] = 'Ungültiges Exportformat angegeben.';
 
-// Einstellungen
-$string['enable_notifications'] = 'E-Mail-Benachrichtigungen aktivieren';
-$string['enable_notifications_desc'] = 'Wenn aktiviert, sendet das System Benachrichtigungen über die Ergebnisse der Berichtserstellung per E-Mail.';
-
-$string['notification_email'] = 'Empfänger E-Mail-Adresse für Benachrichtigungen';
-$string['notification_email_desc'] = 'Die E-Mail-Adresse, an die Benachrichtigungen über die Berichtserstellung gesendet werden sollen.';
-
-$string['external_api_key'] = 'Externer API-Schlüssel';
-$string['external_api_key_desc'] = 'API-Schlüssel, der zur Authentifizierung externer API-Anfragen an den Bericht benötigt wird.';
-
-$string['external_api_url'] = 'Externe API-URL';
-$string['external_api_url_desc'] = 'Die URL des externen Systems, an das die Plugin-Nutzungsdaten gesendet werden sollen.';
-// Datenschutz-Strings
-$string['privacy:metadata:log'] = 'Speichert Protokolleinträge im Zusammenhang mit der Erstellung von Plugin-Nutzungsberichten.';
-$string['privacy:metadata:log:level'] = 'Das Protokollniveau (Info, Warnung, Fehler) des Eintrags.';
-$string['privacy:metadata:log:message'] = 'Der Nachrichteninhalt des Protokolleintrags.';
-$string['privacy:metadata:log:timecreated'] = 'Die Zeit, zu der der Protokolleintrag erstellt wurde.';
-
-$string['autodelete_days'] = 'Berichte automatisch löschen nach (Tagen)';
-$string['autodelete_days_desc'] = 'Berichte nach dieser Anzahl von Tagen automatisch löschen.';
-$string['enable_clilogging'] = 'CLI Aktions-Logging aktivieren';
-$string['enable_clilogging_desc'] = 'Wenn aktiviert, werden CLI Aktionen wie Erstellung, Ansicht und Löschung protokolliert.';
-$string['eventreportcreated'] = 'Plugin-Nutzungsbericht erstellt';
-$string['eventreportviewed'] = 'Plugin-Nutzungsbericht angesehen';
-$string['eventreportdeleted'] = 'Plugin-Nutzungsbericht gelöscht';
-
-$string['pluginusagereporterdashboard'] = 'Plugin-Nutzungsberichte';
-$string['username'] = 'Benutzername';
-$string['created'] = 'Erstellt am';
-$string['actions'] = 'Aktionen';
-$string['downloadcsv'] = 'CSV herunterladen';
-$string['downloadtxt'] = 'TXT herunterladen';
-$string['downloadhtml'] = 'HTML herunterladen';
-$string['delete'] = 'Löschen';
-$string['systemuser'] = 'System (CLI)';
+// CLI- und Admin-Fehler
+$string['adminusernotfound'] = 'Admin-Benutzer konnte nicht gefunden werden.';
+$string['notallowed'] = 'Sie haben keine Berechtigung, diese Funktion zu verwenden.';
+$string['clierror'] = 'CLI-Fehler: Sie müssen als Administrator angemeldet sein, um dieses Skript auszuführen.';
