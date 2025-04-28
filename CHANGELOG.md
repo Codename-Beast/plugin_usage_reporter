@@ -1,19 +1,46 @@
 # Changelog
 
-## Planned for v2.2
-- [x] API rate limiting and usage counters
-- [x] Extended course-based statistics via Webservice
-- [x] **CLI support for admins** — Allow retrieval of usage data via command-line interface, enabling admins to access and export plugin usage reports directly from the CLI.
-- [ ] Optional exponential backoff logic for retries
-- [ ] Webservice token whitelist & optional API key mode
-- [ ] Optional output formats: CSV endpoint for Webservice
-- [ ] Automated report emailing (configurable via settings)
-- [ ] Code coverage metrics for all core classes
-- [ ] Grafana dashboard example JSON & documentation
+## Planned for v2.4
+- [x] Grafana dashboard example JSON & documentation
 
 All notable changes to the Plugin Usage Reporter plugin are documented here.
 
 ---
+## [2.3.0] – 2025-04-28
+
+### ✅ Added
+- Full EN/DE language string coverage
+- New modular Generator system (HTML, CSV, TXT, JSON, XML)
+- Auto-deletion of saved reports after configurable number of days
+- Complete settings restructure into tabbed interface
+- Dashboard interface improved with DataTables
+- CLI script for direct report fetching and export
+- Event-based triggers for auto-reporting (configurable)
+- Enhanced logging (Moodle Log API support)
+- Complete code review and PHP 8.3 compatibility adjustments
+- Strict error handling and full DB-safe queries
+
+### 🔧 Changed
+- Refactored `RawDataFetcher` class to separate fetching and transformation logic
+- Centralized caching configuration
+- Language strings cleaned and optimized
+- Report download and management directly from Dashboard
+
+### ❌ Deprecated
+- Legacy API Key method (now only using Moodle Web Service security)
+
+### 🛠️ Fixed
+- Cache key sanitation issues
+- Minor pagination bugs in data fetching
+- Improved CLI parameter handling
+
+### Known Issues
+- Unit tests and functional tests are still being expanded
+- CLI output improvement planned (structured JSON output for scripts)
+- Unit and functional tests will be fully completed by version 2.4.
+
+---
+
 ## v2.1.3 — 2025-04-21
 ### ✨ Enhancements
 - **Input validation:** Strong type and range validation for `timeframe` (allowed: 1–3650 days) in RawDataFetcher, preventing invalid or dangerous values.
@@ -103,4 +130,4 @@ All notable changes to the Plugin Usage Reporter plugin are documented here.
 - ✅ Support for Moodle 4.5+
 
 ---
-> Last updated: 21.04.2025 — Maintainer: Bernd Schreistetter
+> Last updated: 28.04.2025 — Maintainer: Bernd Schreistetter
