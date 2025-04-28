@@ -2,6 +2,7 @@
 
 ## Planned for v2.4
 - [x] Grafana dashboard example JSON & documentation
+- [x] Refactor Tasks
 
 All notable changes to the Plugin Usage Reporter plugin are documented here.
 

@@ -72,6 +72,7 @@ This major update introduces a modular generator system, auto-deletion of report
 | Unit Tests                     | ⏳ Expanded (Full by v2.4.0) |
 | API Rate Limiting              | ⏳ Planned (v2.4+) |
 | CSV/Extended REST Output       | ⏳ Planned (v2.4+) |
+| Refocator Tasks     | ⏳ Planned (v2.4+) |
 
 ---
 
