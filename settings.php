@@ -64,6 +64,22 @@ if ($hassiteconfig) {
             'verbose' => get_string('loggingverbose', 'local_pluginusagereporter')
         ]
     ));
+    // Auto delete days settings
+    //after which the old reports will be deleted
+    $settings->add(new admin_setting_configtext(
+    'local_pluginusagereporter/autodelete_days',
+    get_string('autodelete_days', 'local_pluginusagereporter'),
+    get_string('autodelete_days_desc', 'local_pluginusagereporter'),
+    30
+    ));
+    // Add a setting to enable or disable logging to the Moodle log
+    $settings->add(new admin_setting_configcheckbox(
+        'local_pluginusagereporter/enable_clilogging',
+        get_string('enable_clilogging', 'local_pluginusagereporter'),
+        get_string('enable_clilogging_desc', 'local_pluginusagereporter'),
+        1
+    ));
+
 
     // Caching
     // This section allows the user to configure caching settings for the plugin usage reporter.

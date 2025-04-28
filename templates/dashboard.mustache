@@ -1,32 +1,28 @@
-<div class="container-fluid">
-    <h2>{{#str}} dashboardtitle, local_pluginusagereporter {{/str}}</h2>
-    
-    <table class="table table-striped">
+<section class="local-pluginusagereporter-dashboard">
+    <h2>{{#str}}pluginusagereporterdashboard, local_pluginusagereporter{{/str}}</h2>
+    <table id="reports-table" class="generaltable">
         <thead>
             <tr>
                 <th>ID</th>
-                <th>Datum</th>
-                <th>Zeitraum</th>
-                <th>Einträge</th>
-                <th>Aktionen</th>
+                <th>{{#str}}username, local_pluginusagereporter{{/str}}</th>
+                <th>{{#str}}created, local_pluginusagereporter{{/str}}</th>
+                <th>{{#str}}actions, local_pluginusagereporter{{/str}}</th>
             </tr>
         </thead>
         <tbody>
             {{#reports}}
             <tr>
                 <td>{{id}}</td>
-                <td>{{date}}</td>
-                <td>{{timeframe}}</td>
-                <td>{{entries}}</td>
+                <td>{{username}}</td>
+                <td>{{created}}</td>
                 <td>
-                    <a href="#" class="btn btn-secondary">Details</a>
+                    <a href="{{downloadurlcsv}}" class="btn btn-secondary btn-sm">{{#str}}downloadcsv, local_pluginusagereporter{{/str}}</a>
+                    <a href="{{downloadurltxt}}" class="btn btn-secondary btn-sm">{{#str}}downloadtxt, local_pluginusagereporter{{/str}}</a>
+                    <a href="{{downloadurlhtml}}" class="btn btn-secondary btn-sm">{{#str}}downloadhtml, local_pluginusagereporter{{/str}}</a>
+                    <a href="{{deleteurl}}" class="btn btn-danger btn-sm">{{#str}}delete, local_pluginusagereporter{{/str}}</a>
                 </td>
             </tr>
             {{/reports}}
         </tbody>
     </table>
-    
-    <div class="text-center mt-4">
-        <small>&copy; 2025 Developed by Eledia.de | Developer: Bernd Schreistetter</small>
-    </div>
-</div>
+</section>

@@ -1,12 +1,12 @@
-<?php 
-/**
- * Removes all records from the local_pluginusagereporter_reports table
- * when the plugin is uninstalled.
- *
- * @return bool true if uninstallation was successful
- */
-function xmldb_local_pluginusagereporter_uninstall() {
-    global $DB;
-    $DB->delete_records('local_pluginusagereporter_reports');
-    return true;
-}
+<?php
+defined('MOODLE_INTERNAL') || die();
+
+// Purge caches
+$cache = \cache::make('local_pluginusagereporter', 'plugin_usage');
+$cache->purge();
+$cache = \cache::make('local_pluginusagereporter', 'api_ratelimit');
+$cache->purge();
+
+// Delete all stored reports
+global $DB;
+$DB->delete_records('pluginusagereporter_reports', []);

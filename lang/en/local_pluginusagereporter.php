@@ -120,3 +120,22 @@ $string['privacy:metadata:log'] = 'Stores log entries related to the generation 
 $string['privacy:metadata:log:level'] = 'The log level (info, warning, error) of the entry.';
 $string['privacy:metadata:log:message'] = 'The message content of the log entry.';
 $string['privacy:metadata:log:timecreated'] = 'The time when the log entry was created.';
+
+$string['autodelete_days'] = 'Auto-delete reports after (days)';
+$string['autodelete_days_desc'] = 'Delete stored reports automatically after this number of days.';
+$string['enable_clilogging'] = 'Enable CLI action logging';
+$string['enable_clilogging_desc'] = 'If enabled, CLI actions such as creation, viewing, and deletion will be logged.';
+$string['eventreportcreated'] = 'Plugin usage report created';
+$string['eventreportdeleted'] = 'Plugin usage report deleted';
+$string['eventreportviewed'] = 'Plugin usage report viewed';
+$string['eventreportdeleted'] = 'Plugin usage report deleted';
+
+$string['pluginusagereporterdashboard'] = 'Plugin Usage Reports';
+$string['username'] = 'Username';
+$string['created'] = 'Created';
+$string['actions'] = 'Actions';
+$string['downloadcsv'] = 'Download CSV';
+$string['downloadtxt'] = 'Download TXT';
+$string['downloadhtml'] = 'Download HTML';
+$string['delete'] = 'Delete';
+$string['systemuser'] = 'System (CLI)';

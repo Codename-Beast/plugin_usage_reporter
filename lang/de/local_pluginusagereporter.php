@@ -87,3 +87,21 @@ $string['privacy:metadata:log'] = 'Speichert Protokolleinträge im Zusammenhang 
 $string['privacy:metadata:log:level'] = 'Das Protokollniveau (Info, Warnung, Fehler) des Eintrags.';
 $string['privacy:metadata:log:message'] = 'Der Nachrichteninhalt des Protokolleintrags.';
 $string['privacy:metadata:log:timecreated'] = 'Die Zeit, zu der der Protokolleintrag erstellt wurde.';
+
+$string['autodelete_days'] = 'Berichte automatisch löschen nach (Tagen)';
+$string['autodelete_days_desc'] = 'Berichte nach dieser Anzahl von Tagen automatisch löschen.';
+$string['enable_clilogging'] = 'CLI Aktions-Logging aktivieren';
+$string['enable_clilogging_desc'] = 'Wenn aktiviert, werden CLI Aktionen wie Erstellung, Ansicht und Löschung protokolliert.';
+$string['eventreportcreated'] = 'Plugin-Nutzungsbericht erstellt';
+$string['eventreportviewed'] = 'Plugin-Nutzungsbericht angesehen';
+$string['eventreportdeleted'] = 'Plugin-Nutzungsbericht gelöscht';
+
+$string['pluginusagereporterdashboard'] = 'Plugin-Nutzungsberichte';
+$string['username'] = 'Benutzername';
+$string['created'] = 'Erstellt am';
+$string['actions'] = 'Aktionen';
+$string['downloadcsv'] = 'CSV herunterladen';
+$string['downloadtxt'] = 'TXT herunterladen';
+$string['downloadhtml'] = 'HTML herunterladen';
+$string['delete'] = 'Löschen';
+$string['systemuser'] = 'System (CLI)';
