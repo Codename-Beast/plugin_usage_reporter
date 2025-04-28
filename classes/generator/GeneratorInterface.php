@@ -1,5 +1,9 @@
 <?php 
-namespace local_pluginusagereporter\reportgenerator;
+// This file is part of Moodle - http://moodle.org/
+
+namespace local_pluginusagereporter\generator;
+
+defined('MOODLE_INTERNAL') || die();
 /**
  * Interface for report generators.
  * This interface is used by the plugin to generate HTML or text reports of plugin usage.
@@ -13,6 +17,6 @@ namespace local_pluginusagereporter\reportgenerator;
  * - user_count: int
  * - roles: string
  */
-interface ReportGeneratorInterface {
+interface GeneratorInterface {
     public function generate(array $data): string;
 }

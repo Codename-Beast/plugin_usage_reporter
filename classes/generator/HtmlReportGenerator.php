@@ -1,11 +1,11 @@
 <?php
-namespace local_pluginusagereporter\reportgenerator;
+namespace local_pluginusagereporter\generator;
 
 defined('MOODLE_INTERNAL') || die();
 
 use flexible_table;
-
-class HtmlReportGenerator implements ReportGeneratorInterface {
+use local_pluginusagereporter\generator\GeneratorInterface;
+class HtmlReportGenerator implements GeneratorInterface {
 /**
  * Generates an HTML report table from the given plugin usage data.
  *
