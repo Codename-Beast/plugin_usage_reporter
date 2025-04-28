@@ -39,7 +39,6 @@ use moodle_exception;
 use dml_exception;
 use cache;
 use local_pluginusagereporter\generator\GeneratorFactory;
-use local_pluginusagereporter\generator\
 use local_pluginusagereporter\ErrorHandler;
 
 class RawDataFetcher implements DataFetchInterface
