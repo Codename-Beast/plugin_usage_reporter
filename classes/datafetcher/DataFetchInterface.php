@@ -69,13 +69,13 @@ interface DataFetchInterface
     public function filterData(?string $pluginfilter = null, ?int $minusagecount = null): array;
 
     /**
-     * Transforms raw data into the desired format (e.g., JSON, XML, CSV, Plaintext).
+     * exports the data to a specified format (e.g., HTML, CSV).
      *
-     * @param array $data The raw data to transform.
-     * @param string $format The desired output format ('json', 'csv', 'txt', etc.).
-     * @return mixed Returns data in the specified format.
+     * @param array $data The data to transform.
+     * @param string $format The desired output format (e.g., 'html', 'csv').
+     * @return mixed Returns the transformed data in the specified format.
      */
-    public function transformData(array $data, string $format) : mixed;
+    public function exportData(array $data, string $format) : mixed;
 
     /**
      * Validates the retrieved data to ensure it meets required standards.
