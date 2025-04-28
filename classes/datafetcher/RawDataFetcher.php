@@ -7,6 +7,14 @@
  * @version    v2.3
  *
  * -------------------------------------------------------------------------------------------------
+ * Recent Changes (v2.3.0 – 2025-05-01) [Generator System Integration]
+ * ++ v2.3.0 – 2025‑05‑01 [Generator System Integration]
+ * + Removed internal transformData() method
+ * + Introduced clean Generator system (GeneratorFactory, Csv/Html/Text/Json/XML Generators)
+ * + RawDataFetcher now purely fetches raw structured data without handling output formats
+ * + Improved strict separation of concerns (fetching vs. rendering)
+ * -------------------------------------------------------------------------------------------------
+ * -------------------------------------------------------------------------------------------------
  * Recent Changes (v1.2.1 – 2025-04-21) [Cross-DB Fixes + Runtime Patch]
  * ++ v1.2.1 – 2025‑04‑21 [Cross‑DB Fixes + Runtime Patch]
  * + Improved input validation for timeframe parameter: accepts only values in 1..3650 days (10 year max)
@@ -19,17 +27,6 @@
  * + Refactored and documented constructor (uses dependency injection, prepares cache and error handling)
  * + Strict separation between cache handling, data transformation, and database querying for improved readability and maintainability
  * + Enhanced in-line documentation and code readability throughout the class
- *
- * -------------------------------------------------------------------------------------------------
- * Recent Changes (v2.3.0 – 2025-05-01) [Generator System Integration]
- * ++ v2.3.0 – 2025‑05‑01 [Generator System Integration]
- * + Removed internal transformData() method
- * + Introduced clean Generator system (GeneratorFactory, Csv/Html/Text/Json/XML Generators)
- * + RawDataFetcher now purely fetches raw structured data without handling output formats
- * + Improved strict separation of concerns (fetching vs. rendering)
- * + Fully Moodle Coding Standard compatible (PHP 8.3 ready)
- * -------------------------------------------------------------------------------------------------
-
  */
 
 namespace local_pluginusagereporter\datafetcher;
@@ -74,13 +71,13 @@ class RawDataFetcher implements DataFetchInterface
      * -------------------*/
 
     /**
-     * [Since v1.1.1-10 G] Fetches raw plugin usage data from the database with optional caching.
+     * Fetches raw plugin usage data from the database with optional caching.
      *
      * This function looks back in the database the specified number of days and returns an array of plugin
      * usage records. The records are sorted by the timestamp when the plugin was last used.
      *
      * @param int $timeframe The number of days to look back from the current time.
-     * @return array|string An array of plugin usage records.
+     * @return array An array of plugin usage records.
      * @throws moodle_exception If the timeframe is invalid or if a database error occurs.
      * @throws dml_exception If a database error occurs.
      */
@@ -350,6 +347,7 @@ class RawDataFetcher implements DataFetchInterface
         // This allows for a fluent interface, enabling method chaining.
         return $this;
     }
+
     /**
      * Builds an array of parameters for the SQL query to retrieve the raw data for the report.
      *
@@ -484,6 +482,8 @@ class RawDataFetcher implements DataFetchInterface
      */
     private function log_debug(string $message, array $data = []): void
     {
+        // Log the debug message with optional data using Moodle's debugging API.
+        // The DEBUG_DEVELOPER constant is used to specify the debug level.
         debugging($message . ' | ' . json_encode($data), DEBUG_DEVELOPER);
     }
 }
