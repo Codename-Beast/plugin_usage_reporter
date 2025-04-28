@@ -20,25 +20,16 @@
  * + Strict separation between cache handling, data transformation, and database querying for improved readability and maintainability
  * + Enhanced in-line documentation and code readability throughout the class
  *
- * Known for:
- * - Cross-DB safe SQL for analytics on course/module usage
- * - Centralized caching logic with TTL configuration and customizable storage
- * - Built-in support for pagination, filtering, and modular data transformation (JSON, Text, CSV, XML)
- * - Ready for extension and integration in automated reporting/task runners
- * - PSR-4 compliant class structure for easy integration in Moodle plugin ecosystem
- *
- * TODO / Future Improvements:
- * - Further expand automated test coverage, especially for edge cases and error conditions
- * - Explore async data fetch/caching for very large sites with high traffic and data volumes
- * - Consider implementing a more efficient data structure for caching and filtering (e.g., Redis, Memcached)
- * - Investigate the possibility of using Moodle's built-in caching mechanisms for better performance
- * - Optional: expose cache status and error log to admin dashboards for better monitoring
- * - Optional: add a CLI command for manual cache clearing and data fetching
- * - Optional: add a UI for configuring cache settings and data fetching parameters
- * - Optional: add a UI for configuring data transformation settings (e.g., CSV delimiter, XML root element)
- * - Optional: add a UI for configuring data filtering settings (e.g., filter by course, module, user role)
- * - Optional: add a UI for configuring data export settings (e.g., export to file, send via email)
  * -------------------------------------------------------------------------------------------------
+ * Recent Changes (v2.3.0 – 2025-05-01) [Generator System Integration]
+ * ++ v2.3.0 – 2025‑05‑01 [Generator System Integration]
+ * + Removed internal transformData() method
+ * + Introduced clean Generator system (GeneratorFactory, Csv/Html/Text/Json/XML Generators)
+ * + RawDataFetcher now purely fetches raw structured data without handling output formats
+ * + Improved strict separation of concerns (fetching vs. rendering)
+ * + Fully Moodle Coding Standard compatible (PHP 8.3 ready)
+ * -------------------------------------------------------------------------------------------------
+
  */
 
 namespace local_pluginusagereporter\datafetcher;
@@ -47,6 +38,8 @@ defined('MOODLE_INTERNAL') || die();
 use moodle_exception;           
 use dml_exception;
 use cache;
+use local_pluginusagereporter\generator\GeneratorFactory;
+use local_pluginusagereporter\generator\
 use local_pluginusagereporter\ErrorHandler;
 
 class RawDataFetcher implements DataFetchInterface
@@ -269,62 +262,17 @@ class RawDataFetcher implements DataFetchInterface
         $this->cache->set($key, $data, $ttl);
         $this->log_debug("Data cached", ['key' => $key, 'ttl' => $ttl]);
     }
-
-    /**
-    * [Since v1.1.1-10 C] Transforms the given data into the specified format.
+      /**
+     * [v2.3.0] Exports the given data to the specified format using Generator system.
      *
-    * @param array $data The data to be transformed.
-    * @param string $format The target format for the transformation ('json', 'txt', 'csv', 'xml').
-    * @return mixed Returns the transformed data in the specified format or handles an error if the format is unsupported.
-    * @throws moodle_exception If the given format is not supported
-    */
-    public function transformData(array $data, string $format) : mixed
-    {
-        if (!in_array(strtolower($format), ['json', 'txt', 'csv', 'xml'])) {
-            	throw new moodle_exception('error_invalidformat', 'local_pluginusagereporter');
-        }
-        switch (strtolower($format)) {
-            case 'json':
-                return json_encode($data, JSON_PRETTY_PRINT);
-
-            case 'txt':
-                return implode("\n", array_map(fn($item) => implode(' | ', (array)$item), $data));
-
-            case 'csv':
-                $output = fopen('php://temp', 'r+');
-                if (!empty($data)) {
-                    // Add headers
-                    fputcsv($output, array_keys((array)$data[0]));
-                    // Add data rows
-                    foreach ($data as $row) {
-                        fputcsv($output, (array)$row);
-                    }
-                }
-                rewind($output);
-                $csv = stream_get_contents($output);
-                fclose($output);
-                return $csv;
-
-            case 'xml':
-                $xml = new \SimpleXMLElement('<report/>');
-
-                foreach ($data as $row) {
-                    $entry = $xml->addChild('entry');
-                    foreach ((array)$row as $key => $value) {
-                        // Clean key name for XML nodes
-                        $key = preg_replace('/[^a-z0-9_]/i', '', $key);
-                        $entry->addChild($key, htmlspecialchars((string)$value));
-                    }
-                }
-
-                return $xml->asXML();
-
-            default:
-                // Handle unsupported format
-                $this->log_debug('Unsupported format requested', ['format' => $format]);
-                throw new moodle_exception('error_invalidformat',  'local_pluginusagereporter', '', null, $format);
-
-        }
+     * @param array $data
+     * @param string $format csv|txt|html|xml|json
+     * @return string
+     * @throws moodle_exception
+     */
+    public function exportData(array $data, string $format): string {
+        $generator = GeneratorFactory::make($format);
+        return $generator->generate($data);
     }
    
     /**
