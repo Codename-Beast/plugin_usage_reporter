@@ -48,7 +48,7 @@ It focuses on visibility, last access timeframe, and provides exportable data in
 
 ## 📜 Release Notes
 
-**May 01, 2025 — 2.3.0:**  
+**Aprile 28, 2025 — 2.3.0:**  
 This major update introduces a modular generator system, auto-deletion of reports, expanded webservice support, stricter validations, and a fully redesigned dashboard interface with export/download options.
 
 ---
