@@ -1,32 +1,29 @@
 <?php
 /**
- * RawDataFetcher – Retrieves raw plugin usage data from core Moodle tables.
+ * RawDataFetcher - Retrieves raw plugin usage data from core Moodle tables.
  *
- * @package    Eledia local_pluginusagereporter Plugin
+ * @package    local_pluginusagereporter
  * @author     Bernd Schreistetter
- * @version    v2.3
+ * @copyright  2024 Bernd Schreistetter
+ * @license    MIT https://opensource.org/licenses/MIT
  *
- * -------------------------------------------------------------------------------------------------
- * Recent Changes (v2.3.0 – 2025-05-01) [Generator System Integration]
- * ++ v2.3.0 – 2025‑05‑01 [Generator System Integration]
- * + Removed internal transformData() method
- * + Introduced clean Generator system (GeneratorFactory, Csv/Html/Text/Json/XML Generators)
- * + RawDataFetcher now purely fetches raw structured data without handling output formats
- * + Improved strict separation of concerns (fetching vs. rendering)
- * -------------------------------------------------------------------------------------------------
- * -------------------------------------------------------------------------------------------------
+ * Recent Changes (v2.3.0 – 2025-04-28) [Generator System Integration]
+ *  - Removed internal transformData() method
+ *  - Introduced clean Generator system (GeneratorFactory, Csv/Html/Text/Json/XML Generators)
+ *  - RawDataFetcher now purely fetches raw structured data without handling output formats
+ *  - Improved strict separation of concerns (fetching vs. rendering)
+ *
  * Recent Changes (v1.2.1 – 2025-04-21) [Cross-DB Fixes + Runtime Patch]
- * ++ v1.2.1 – 2025‑04‑21 [Cross‑DB Fixes + Runtime Patch]
- * + Improved input validation for timeframe parameter: accepts only values in 1..3650 days (10 year max)
- * + Enforced type safety for critical parameters ($timeframe, $limit, $offset) to prevent query issues
- * + Extended support for output formats in transformData() and robust error handling on invalid formats
- * + Cache key sanitation with regex to avoid buggy/malformed cache access
- * + SQL logic for group_concat+user roles: now DB-agnostic, safely truncated to 255 chars to optimize cross-database compatibility and performance
- * + Centralized and extended developer/debug logging via Moodle's debugging() API
- * + Unified and documented naming and internal property usage ($errorHandler, $lastcachekey)
- * + Refactored and documented constructor (uses dependency injection, prepares cache and error handling)
- * + Strict separation between cache handling, data transformation, and database querying for improved readability and maintainability
- * + Enhanced in-line documentation and code readability throughout the class
+ *  - Improved input validation for timeframe parameter: accepts only values in 1..3650 days (10 year max)
+ *  - Enforced type safety for critical parameters ($timeframe, $limit, $offset) to prevent query issues
+ *  - Extended support for output formats in transformData() and robust error handling on invalid formats
+ *  - Cache key sanitation with regex to avoid buggy/malformed cache access
+ *  - SQL logic for group_concat+user roles: now DB-agnostic, safely truncated to 255 chars to optimize cross-database compatibility and performance
+ *  - Centralized and extended developer/debug logging via Moodle's debugging() API
+ *  - Unified and documented naming and internal property usage ($errorHandler, $lastcachekey)
+ *  - Refactored and documented constructor (uses dependency injection, prepares cache and error handling)
+ *  - Strict separation between cache handling, data transformation, and database querying for improved readability and maintainability
+ *  - Enhanced in-line documentation and code readability throughout the class
  */
 
 namespace local_pluginusagereporter\datafetcher;
@@ -106,8 +103,8 @@ class RawDataFetcher implements DataFetchInterface
         // If caching is enabled and the data is already cached, return the cached data.
         if ($cachingenabled && ($cached = $this->cache->get($cachekey)) !== false) {
             return [
-                'status' => empty($cached) ? 'nodata' : 'ok',
-                'records' => $cached,
+                'status' => empty($cached) ? 'status' : 'ok',
+                'records' => empty($cached) ? 'noRecords' : 'ok',
                 'recordcount' => count($cached)
             ];
         }
@@ -118,7 +115,6 @@ class RawDataFetcher implements DataFetchInterface
         $sql = $this->build_sql_query();
         // try to fetch the data from the database.
         // If an error occurs, log it and throw a moodle_exception.
-        // The $params array contains the parameters for the SQL query.
         try {
             $records = $DB->get_records_sql($sql, $params, $offset, $limit);
         } catch (\dml_exception $e) {
@@ -149,6 +145,7 @@ class RawDataFetcher implements DataFetchInterface
 
     /**
      * Fetches detailed plugin usage data including user counts and roles.
+     * Just for Testing purposes, not used in the plugin!
      *
      * @param int|null $starttime Start timestamp for data retrieval.
      * @param int|null $endtime End timestamp for data retrieval.

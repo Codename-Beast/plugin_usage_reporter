@@ -30,6 +30,14 @@ class report_created extends \core\event\base {
         return get_string('eventreportcreated', 'local_pluginusagereporter');
     }
 
+    /**
+     * Returns a description of the report created event.
+     *
+     * If the report was created by the system, it indicates a CLI action.
+     * Otherwise, it specifies the user ID and report ID involved in the creation.
+     *
+     * @return string Description of the event.
+     */
     public function get_description(): string {
         if (!empty($this->other['source']) && $this->other['source'] === 'system') {
             return "A plugin usage report was created by the system (CLI action).";

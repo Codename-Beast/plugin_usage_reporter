@@ -8,6 +8,12 @@ use coding_exception;
  */
 class CsvReportGenerator implements GeneratorInterface {
 
+    /**
+     * Generate a CSV report of plugin usage.
+     *
+     * @param array $data The plugin usage data to generate a report for.
+     * @return string The generated report as a CSV string.
+     */
     public function generate(array $data): string {
         if (empty($data)) {
             return "No data available\n";

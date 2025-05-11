@@ -72,8 +72,9 @@ try {
             return isset($row->modulename) && $row->modulename === $pluginfilter;
         });
     }
-
-    $output = $fetcher->transformData(is_array($records) ? array_values($records) : [], $format);
+    // Attaction Transform Data dose not exist in the RawDataFetcher class anymore.
+    //@ToDO Fix this°!
+    //$output = $fetcher->transformData(is_array($records) ? array_values($records) : [], $format);
 
     echo $output . PHP_EOL;
 

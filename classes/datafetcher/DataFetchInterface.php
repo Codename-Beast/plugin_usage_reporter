@@ -44,7 +44,7 @@ interface DataFetchInterface
 
     /**
      * Fetches detailed plugin usage data including user counts and roles.
-     *
+     * Just for Testing purposes, not used in the plugin.
      * @param int|null $starttime Start timestamp.
      * @param int|null $endtime End timestamp.
      * @return array
